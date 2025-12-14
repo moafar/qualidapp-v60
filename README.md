@@ -99,16 +99,23 @@ Descripción breve del YAML
 Dataset de ejemplo (CSV)
 - `examples/sample.csv` contiene un pequeño conjunto de datos para probar el contrato anterior. Puedes abrirlo con Excel o generar un `.xlsx` usando el script `scripts/make_sample_xlsx.py`.
 
-Generar un Excel de muestra (opcional)
-Instala `openpyxl` y ejecuta el script incluido:
+
+Generar un Excel de muestra (opcional - sin Python)
+Si no quieres usar Python, hemos incluido un script Node que genera `examples/sample.xlsx` desde el CSV de ejemplo.
 
 ```bash
-pip install openpyxl
-python3 scripts/make_sample_xlsx.py --out examples/sample.xlsx
+# Instala la dependencia de Node (requiere Node.js y npm)
+npm install xlsx
+
+# Generar el Excel desde el CSV por defecto
+node scripts/make_sample_xlsx.js --out examples/sample.xlsx
+
+# Opcional: especificar CSV de entrada
+node scripts/make_sample_xlsx.js --csv examples/sample.csv --out examples/sample.xlsx
 ```
 
 Contenido del script
-- `scripts/make_sample_xlsx.py` crea `examples/sample.xlsx` a partir de `examples/sample.csv`.
+- `scripts/make_sample_xlsx.js` crea `examples/sample.xlsx` a partir de `examples/sample.csv` usando la librería `xlsx` de Node.
 
 Cómo añadir reglas a la aplicación
 1. Añade un archivo en `src/core/rules/` que exporte una clase con la API esperada:
