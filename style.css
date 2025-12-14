@@ -1,0 +1,495 @@
+:root {
+    /* --- Paleta de Colores Base --- */
+    --bg-body: #f8f9fa;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    --accent-color: #2563eb;
+    --accent-hover: #1d4ed8;
+
+    /* --- Tipos de Datos (Badges) --- */
+    --type-identifier-bg: #f3e8ff; --type-identifier-fg: #7e22ce;
+    --type-text-bg: #dcfce7;       --type-text-fg: #15803d;
+    --type-numeric-bg: #dbeafe;    --type-numeric-fg: #1d4ed8;
+    --type-datetime-bg: #ffedd5;   --type-datetime-fg: #c2410c;
+    --type-boolean-bg: #ecfdf5;    --type-boolean-fg: #047857;
+
+    /* --- Criticidad --- */
+    --crit-high-fg: #b91c1c;
+    --crit-med-fg: #b45309;
+    --crit-low-fg: #374151;
+
+    /* --- Layout Resizable (Configuración Inicial) --- */
+    --editor-width: 450px; /* Ancho inicial del editor */
+}
+
+/* --- BASE --- */
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden { display: none !important; }
+
+
+/* --- 1. HEADER (UNIFICADO: Marca | Tabs | Acciones) --- */
+header {
+    height: 55px;
+    padding: 0 20px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Área de Marca (Izquierda) */
+.brand-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+}
+.brand-area h1 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Área de Acciones (Derecha) */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 200px;
+    justify-content: flex-end;
+}
+
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.v-separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+}
+
+
+/* --- 2. TABS (EN EL HEADER) --- */
+.header-tabs {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+}
+
+.header-tabs .tab {
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.header-tabs .tab:hover {
+    color: var(--accent-color);
+    background-color: #f8fafc;
+}
+
+.header-tabs .tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    background-color: #f0f9ff;
+}
+
+
+/* --- 3. BOTONES --- */
+.btn-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 36px;
+}
+
+.btn-header:hover {
+    border-color: var(--accent-color);
+    background: #f8fafc;
+    color: var(--accent-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-header:active { transform: translateY(0); }
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+    border: 1px solid var(--accent-color);
+}
+.btn-primary:hover {
+    background: var(--accent-hover);
+    color: white;
+}
+
+
+/* --- 4. LAYOUT PRINCIPAL Y RESIZE (WRAP, GUTTER) --- */
+.wrap {
+    display: grid;
+    /* Usa la variable CSS para el ancho del editor y el gutter de 10px */
+    grid-template-columns: var(--editor-width) 10px 1fr;
+    flex: 1;
+    overflow: hidden;
+}
+
+.gutter {
+    background-color: var(--border-color);
+    cursor: col-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    z-index: 10;
+}
+
+.gutter:hover, .gutter.dragging {
+    background-color: var(--accent-color);
+    box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+}
+
+.gutter::after {
+    content: "⋮";
+    color: #94a3b8;
+    font-weight: bold;
+    pointer-events: none;
+}
+.gutter:hover::after { color: white; }
+
+/* Paneles */
+.pane {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    /* Ya no necesitan border-right, lo tiene el gutter */
+}
+.pane:last-child { 
+    background: var(--bg-body); 
+}
+
+/* Editor Izquierdo */
+textarea {
+    flex: 1;
+    width: 100%;
+    border: none;
+    resize: none;
+    padding: 16px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    background: #fafafa;
+    outline: none;
+    color: var(--text-primary);
+}
+textarea:focus { background: #fff; }
+
+
+/* --- 5. VISOR DERECHO (TOOLBAR, CONTENT) --- */
+/* Toolbar de Filtros */
+.toolbar {
+    padding: 8px 20px;
+    background: #f8fafc; /* Fondo gris claro */
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.toolbar input, .toolbar select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+/* Contenido de las pestañas (contenedor de los tab-pane) */
+.tab-content {
+    flex: 1;
+    /* --- CORRECCIÓN CRÍTICA 1: QUITAR EL SCROLL GLOBAL --- */
+    overflow: hidden; 
+}
+
+/* Poner padding a los paneles individuales, no al contenedor */
+.tab-pane {
+    /* CRÍTICO 2: La pestaña activa debe ocupar el 100% de la altura */
+    height: 100%; 
+    padding: 20px; /* Padding solo para el contenido que no es TOC */
+    box-sizing: border-box; /* Asegura que el padding no exceda el 100% */
+    /* IMPORTANTE: El padding en TOC se manejará dentro de rule-content-area */
+}
+
+
+/* --- 6. ESTILOS DE TABLA / BADGES (Reutilizados de tu original) --- */
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+th {
+    text-align: left;
+    padding: 10px 12px;
+    background: #f8fafc;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+
+.badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+.b-identifier { background: var(--type-identifier-bg); color: var(--type-identifier-fg); }
+.b-text { background: var(--type-text-bg); color: var(--type-text-fg); }
+.b-numeric { background: var(--type-numeric-bg); color: var(--type-numeric-fg); }
+.b-datetime { background: var(--type-datetime-bg); color: var(--type-datetime-fg); }
+.b-boolean { background: var(--type-boolean-bg); color: var(--type-boolean-fg); }
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+.k { color: var(--text-muted); font-family: monospace; }
+
+.rule-tag { 
+    background: #f1f5f9; 
+    border: 1px solid #e2e8f0; 
+    padding: 1px 5px; 
+    border-radius: 3px; 
+    font-family: monospace; 
+    color: #475569; 
+    margin-right: 4px; 
+    display: inline-block; 
+    margin-bottom: 2px;
+}
+
+/* --- ESTILOS DE VISTA DE ÁRBOL (CONTRACT TREE) --- */
+
+.contract-tree {
+    list-style: none; /* Elimina viñetas por defecto */
+    padding-left: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: monospace;
+}
+
+.nested-list {
+    list-style: none;
+    padding-left: 20px; /* Sangría para anidamiento */
+    border-left: 1px dashed var(--border-color); /* Línea de conexión visual */
+    margin-left: 8px;
+}
+
+.contract-tree li {
+    padding: 2px 0;
+}
+
+/* Etiqueta del nodo (Objetos/Arrays) */
+.tree-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: default;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+.tree-object > .tree-label { background: #f0f9ff; color: #1d4ed8; }
+.tree-array > .tree-label { background: #fffbeb; color: #b45309; }
+
+/* Nodos Primitivos (Clave: Valor) */
+.tree-primitive {
+    color: var(--text-muted);
+}
+.tree-key {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.tree-value {
+    font-weight: 700;
+}
+
+/* Estilos por tipo de valor */
+.tree-type-number { color: #059669; }
+.tree-type-string { color: #b91c1c; }
+.tree-type-boolean { color: #0ea5e9; }
+
+/* --- ESTILOS DE COLAPSADO (TOGGLE) --- */
+
+/* Escondemos las listas anidadas por defecto */
+.nested-list {
+    display: none; 
+}
+
+/* Indicador de colapso/expansión */
+.tree-toggle {
+    display: inline-block;
+    width: 12px;
+    margin-right: 5px;
+    cursor: pointer;
+    font-weight: 900;
+    color: var(--accent-color);
+    user-select: none; /* Prevenir selección de texto */
+}
+
+/* El nodo que está expandido tiene la lista visible */
+.tree-label.expanded + .nested-list {
+    display: block;
+}
+
+/* Estilo para los nodos que no tienen hijos (hojas) */
+.tree-primitive .tree-toggle {
+    visibility: hidden; /* Ocultar el icono si no hay nada que colapsar */
+}
+
+/* --- ESTILOS DE RULE CATALOG --- */
+
+.rule-card {
+    /* Quitamos margin-bottom: 20px; ya que el layout lo gestionará */
+}
+
+.rule-title {
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.rule-description {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.rule-card h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.rule-param {
+    margin-bottom: 5px;
+    border-left: 2px solid #a0aec0;
+    padding-left: 10px;
+    font-size: 12px;
+}
+
+.rule-param .k {
+    font-family: system-ui, sans-serif; /* Usar fuente normal, no monospace */
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* --- ESTILOS DE RULE CATALOG CON TOC (CORREGIDOS Y SIMPLIFICADOS) --- */
+
+.rule-catalog-layout {
+    display: flex;
+    height: 100%; 
+    width: 100%;
+}
+
+/* Sidebar de la Tabla de Contenidos (TOC) */
+.rule-toc-sidebar {
+    width: 200px; 
+    flex-shrink: 0;
+    padding: 20px 15px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    /* Se mantienen fijos y usan el 100% del espacio de la pestaña */
+    height: 100%; 
+    overflow-y: auto; 
+}
+
+.rule-toc-sidebar h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.toc-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.toc-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 4px 0;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.toc-link:hover {
+    color: var(--accent-color);
+}
+
+/* Área principal donde se muestran los detalles de las reglas */
+.rule-content-area {
+    flex-grow: 1;
+    /* CRÍTICO: Aquí es donde aplicamos el padding para el contenido */
+    padding: 20px 30px; 
+    height: 100%; /* Toma el 100% de la altura disponible */
+    overflow-y: auto; /* ESTO HACE QUE SOLO EL CONTENIDO PRINCIPAL HAGA SCROLL */
+}
+
+/* Ajuste del borde superior de la tarjeta de la regla */
+.rule-card {
+    margin-bottom: 30px;
+}
