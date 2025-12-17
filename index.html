@@ -47,38 +47,37 @@
         <div class="gutter" id="resizeGutter"></div>
 
         <div class="pane" id="viewerPane">
-            
-            <div class="toolbar" id="filterToolbar">
-                <input type="text" id="searchFilter" placeholder="Buscar columna..." style="width: 200px;">
-                <select id="critFilter">
-                    <option value="">Criticidad: Todas</option>
-                    <option value="high">Alta</option>
-                    <option value="medium">Media</option>
-                    <option value="low">Baja</option>
-                </select>
-                <select id="typeFilter" title="Filtrar por tipo esperado">
-                    <option value="">Tipo: todos</option>
-                    <option value="identifier">Identificador</option>
-                    <option value="text">Texto</option>
-                    <option value="categorical">Categórico</option>
-                    <option value="numeric">Numérico</option>
-                    <option value="datetime">Fecha/Hora</option>
-                    <option value="boolean">Booleano</option>
-                </select>
-            </div>
-
+            <!-- toolbar movida dentro de #tab-columns; duplicado eliminado -->
             <div class="tab-content">
                 <div id="tab-overview" class="tab-pane active">
-                    <div style="color:var(--text-muted); padding:20px;">[Resumen del Contrato, por implementar]</div>
+                    <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver su resumen]</div>
                 </div>
                 <div id="tab-tree" class="tab-pane hidden">
-                    <div style="color:var(--text-muted); padding:20px;">[Árbol del Contrato, por implementar]</div>
+                    <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el Árbol]</div>
                 </div>
                 <div id="tab-columns" class="tab-pane hidden">
-                    <div style="color:var(--text-muted); padding:20px;">[Columnas del Contrato, por implementar]</div>
+                    <div class="toolbar" id="filterToolbar">
+                        <input type="text" id="searchFilter" placeholder="Buscar columna..." style="width: 200px;">
+                        <select id="critFilter">
+                            <option value="">Criticidad: Todas</option>
+                            <option value="high">Alta</option>
+                            <option value="medium">Media</option>
+                            <option value="low">Baja</option>
+                        </select>
+                        <select id="typeFilter" title="Filtrar por tipo esperado">
+                            <option value="">Tipo: todos</option>
+                            <option value="identifier">Identificador</option>
+                            <option value="text">Texto</option>
+                            <option value="categorical">Categórico</option>
+                            <option value="numeric">Numérico</option>
+                            <option value="datetime">Fecha/Hora</option>
+                            <option value="boolean">Booleano</option>
+                        </select>
+                    </div>
+                    <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el detalle de columnas]</div>
                 </div>
                 <div id="tab-catalog" class="tab-pane hidden">
-                    <div style="color:var(--text-muted); padding:20px;">[Catálogo de Reglas, por implementar]</div>
+                    <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el Catálogo de Reglas]</div>
                 </div>
                 <div id="tab-validation" class="tab-pane hidden">
                     <div style="display:flex; gap:10px; align-items:center;">

@@ -399,6 +399,7 @@ tr:last-child td { border-bottom: none; }
 
 .rule-card {
     /* Quitamos margin-bottom: 20px; ya que el layout lo gestionará */
+    background: #7e22ce;
 }
 
 .rule-title {

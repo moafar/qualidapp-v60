@@ -1,0 +1,220 @@
+contract_version: '1.4'
+history:
+  - version: '1.0'
+    date: 2025-12-13T00:00:00.000Z
+    author: AI Data Engineer
+    description: Versión inicial del contrato de datos para el dataset de estudios basales de polisomnografía.
+dataset:
+  id: stg_clisueno_basal_estudio_basal
+  title: Datos de Estudio de Polisomnografía Basal
+  description: Conjunto de datos que contiene las métricas y resultados clave de los estudios de polisomnografía de diagnóstico (basal) de pacientes, incluyendo datos demográficos y métricas de sueño.
+  owner: Equipo de Análisis de Sueño
+  domain: Salud / Sueño
+  tags:
+    - polisomnografia
+    - basal
+    - diagnostico
+    - apnea
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+rule_catalog:
+  - id: required
+    description: El campo no puede ser nulo.
+  - id: unique
+    description: Todos los valores en el campo deben ser únicos.
+  - id: range
+    description: El valor debe estar dentro de un rango numérico (min, max).
+  - id: domain
+    description: El valor debe ser una de las opciones permitidas (allowed_values).
+  - id: regex
+    description: El valor debe coincidir con un patrón de expresión regular (pattern).
+columns:
+  - name: pte_nombre
+    expected_type: text
+    criticality: high
+    description: Nombre completo del paciente.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+      - id: regex
+        pattern: ^[A-Z\s]+$
+  - name: pte_id
+    expected_type: identifier
+    criticality: high
+    description: Número de identificación único del paciente.
+    normalization:
+      - trim
+    rules:
+      - id: required
+      - id: unique
+  - name: pte_imc
+    expected_type: numeric
+    criticality: medium
+    description: Índice de Masa Corporal (IMC) del paciente. Calculado como peso/talla².
+    rules:
+      - id: required
+      - id: range
+        min: 10
+        max: 80
+  - name: pte_anos_decimales
+    expected_type: numeric
+    criticality: medium
+    description: Edad del paciente en años (decimales).
+    rules:
+      - id: required
+      - id: range
+        min: 0
+        max: 150
+  - name: pte_peso_kg
+    expected_type: numeric
+    criticality: medium
+    description: Peso del paciente en kilogramos (kg).
+    rules:
+      - id: required
+      - id: range
+        min: 10
+        max: 300
+  - name: pte_talla_cm
+    expected_type: numeric
+    criticality: medium
+    description: Talla del paciente en centímetros (cm).
+    rules:
+      - id: required
+      - id: range
+        min: 50
+        max: 250
+  - name: basal_solicita
+    expected_type: text
+    criticality: medium
+    description: Médico o especialista que solicita el estudio de sueño.
+    normalization:
+      - trim
+    rules:
+      - id: required
+  - name: basal_empresa
+    expected_type: categorical
+    criticality: high
+    description: Entidad Promotora de Salud (EPS) o empresa responsable de la cobertura.
+    normalization:
+      - trim
+    rules:
+      - id: required
+  - name: basal_fecha_estudio
+    expected_type: datetime
+    criticality: high
+    description: Fecha y hora en que se realizó el estudio basal.
+    rules:
+      - id: required
+      - id: regex
+        pattern: ^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$
+  - name: basal_uuid
+    expected_type: identifier
+    criticality: high
+    description: Identificador Universal Único del registro del estudio.
+    rules:
+      - id: required
+      - id: unique
+      - id: regex
+        pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+  - name: basal_epworth
+    expected_type: numeric
+    criticality: medium
+    description: Puntuación de la Escala de Somnolencia de Epworth. Rango de 0 a 24.
+    rules:
+      - id: range
+        min: 0
+        max: 24
+  - name: basal_tiempo_en_cama
+    expected_type: numeric
+    criticality: medium
+    description: Tiempo total que el paciente pasó en la cama (minutos).
+    rules:
+      - id: required
+      - id: range
+        min: 100
+  - name: basal_tiempo_sueno
+    expected_type: numeric
+    criticality: medium
+    description: Tiempo total real de sueño (minutos).
+    rules:
+      - id: required
+      - id: range
+        min: 100
+  - name: basal_eficiencia_sueno
+    expected_type: numeric
+    criticality: medium
+    description: Eficiencia del sueño (Tiempo de Sueño / Tiempo en Cama) en porcentaje (0-100).
+    rules:
+      - id: required
+      - id: range
+        min: 0
+        max: 100
+  - name: basal_iac
+    expected_type: numeric
+    criticality: medium
+    description: Índice de Arousal Central (eventos por hora).
+    rules:
+      - id: range
+        min: 0
+  - name: basal_iao
+    expected_type: numeric
+    criticality: medium
+    description: Índice de Apnea Obstructiva (eventos por hora).
+    rules:
+      - id: range
+        min: 0
+  - name: basal_iam
+    expected_type: numeric
+    criticality: medium
+    description: Índice de Apnea Mixta (eventos por hora).
+    rules:
+      - id: range
+        min: 0
+  - name: basal_ih
+    expected_type: numeric
+    criticality: medium
+    description: Índice de Hipopnea (eventos por hora).
+    rules:
+      - id: range
+        min: 0
+  - name: basal_iah
+    expected_type: numeric
+    criticality: high
+    description: Índice de Apnea-Hipopnea (IAH) total (eventos por hora). Es la métrica clave para el diagnóstico de SAHOS.
+    rules:
+      - id: required
+      - id: range
+        min: 0
+  - name: basal_t90
+    expected_type: numeric
+    criticality: low
+    description: Tiempo en que la Saturación de Oxígeno (SpO2) estuvo por debajo del 90% (proporción o porcentaje).
+    rules:
+      - id: range
+        min: 0
+        max: 1
+  - name: basal_t80
+    expected_type: numeric
+    criticality: low
+    description: Tiempo en que la Saturación de Oxígeno (SpO2) estuvo por debajo del 80% (proporción o porcentaje).
+    rules:
+      - id: range
+        min: 0
+        max: 1
+  - name: basal_t70
+    expected_type: numeric
+    criticality: low
+    description: Tiempo en que la Saturación de Oxígeno (SpO2) estuvo por debajo del 70% (proporción o porcentaje).
+    rules:
+      - id: range
+        min: 0
+        max: 1
+  - name: basal_version_control
+    expected_type: numeric
+    criticality: low
+    description: Campo de control de versión del software de adquisición (puede estar obsoleto o vacío).
+    rules: []
