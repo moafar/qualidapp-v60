@@ -15,14 +15,27 @@
     --type-datetime-bg: #ffedd5;   --type-datetime-fg: #c2410c;
     --type-boolean-bg: #ecfdf5;    --type-boolean-fg: #047857;
 
-    /* --- Criticidad --- */
-    --crit-high-fg: #b91c1c;
-    --crit-med-fg: #b45309;
-    --crit-low-fg: #374151;
+        /* --- Criticidad --- */
+    --crit-high-fg: #b91c1c;   /* rojo oscuro – riesgo / bloqueo */
+    --crit-med-fg:  #d97706;   /* ámbar intenso – advertencia */
+    --crit-low-fg:  #047857;   /* verde petróleo – estable */
+
+    /* --- Sensibilidad (Badges) --- */
+    --sensitive-pii-bg: #fef3c7;
+    --sensitive-pii-fg: #92400e;
+    --sensitive-qid-bg: #ede9fe;
+    --sensitive-qid-fg: #5b21b6;
+
+    /* --- Fondos secundarios --- */
+    --bg-secondary: #f8fafc;
 
     /* --- Layout Resizable (Configuración Inicial) --- */
     --editor-width: 450px; /* Ancho inicial del editor */
 }
+
+/* --- Badges de sensibilidad (FUERA de :root) --- */
+.badge-pii { background: var(--sensitive-pii-bg); color: var(--sensitive-pii-fg); }
+.badge-qid { background: var(--sensitive-qid-bg); color: var(--sensitive-qid-fg); }
 
 /* --- BASE --- */
 body {
@@ -36,7 +49,6 @@ body {
 }
 
 .hidden { display: none !important; }
-
 
 /* --- 1. HEADER (UNIFICADO: Marca | Tabs | Acciones) --- */
 header {
@@ -84,7 +96,6 @@ header {
     background-color: var(--border-color);
 }
 
-
 /* --- 2. TABS (EN EL HEADER) --- */
 .header-tabs {
     display: flex;
@@ -117,7 +128,6 @@ header {
     border-bottom-color: var(--accent-color);
     background-color: #f0f9ff;
 }
-
 
 /* --- 3. BOTONES --- */
 .btn-header {
@@ -156,11 +166,9 @@ header {
     color: white;
 }
 
-
 /* --- 4. LAYOUT PRINCIPAL Y RESIZE (WRAP, GUTTER) --- */
 .wrap {
     display: grid;
-    /* Usa la variable CSS para el ancho del editor y el gutter de 10px */
     grid-template-columns: var(--editor-width) 10px 1fr;
     flex: 1;
     overflow: hidden;
@@ -195,10 +203,9 @@ header {
     display: flex;
     flex-direction: column;
     background: var(--bg-card);
-    /* Ya no necesitan border-right, lo tiene el gutter */
 }
-.pane:last-child { 
-    background: var(--bg-body); 
+.pane:last-child {
+    background: var(--bg-body);
 }
 
 /* Editor Izquierdo */
@@ -216,12 +223,10 @@ textarea {
 }
 textarea:focus { background: #fff; }
 
-
 /* --- 5. VISOR DERECHO (TOOLBAR, CONTENT) --- */
-/* Toolbar de Filtros */
 .toolbar {
     padding: 8px 20px;
-    background: #f8fafc; /* Fondo gris claro */
+    background: #f8fafc;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     gap: 10px;
@@ -237,25 +242,18 @@ textarea:focus { background: #fff; }
     font-size: 13px;
 }
 
-/* Contenido de las pestañas (contenedor de los tab-pane) */
 .tab-content {
     flex: 1;
-    /* --- CORRECCIÓN CRÍTICA 1: QUITAR EL SCROLL GLOBAL --- */
-    overflow: hidden; 
+    overflow: hidden;
 }
 
-/* Poner padding a los paneles individuales, no al contenedor */
 .tab-pane {
-    /* CRÍTICO 2: La pestaña activa debe ocupar el 100% de la altura */
-    height: 100%; 
-    padding: 20px; /* Padding solo para el contenido que no es TOC */
-    box-sizing: border-box; /* Asegura que el padding no exceda el 100% */
-    /* IMPORTANTE: El padding en TOC se manejará dentro de rule-content-area */
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-
-/* --- 6. ESTILOS DE TABLA / BADGES (Reutilizados de tu original) --- */
-
+/* --- 6. ESTILOS DE TABLA / BADGES --- */
 table {
     width: 100%;
     border-collapse: separate;
@@ -306,22 +304,21 @@ tr:last-child td { border-bottom: none; }
 .kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px; margin-bottom: 8px; font-size: 13px; }
 .k { color: var(--text-muted); font-family: monospace; }
 
-.rule-tag { 
-    background: #f1f5f9; 
-    border: 1px solid #e2e8f0; 
-    padding: 1px 5px; 
-    border-radius: 3px; 
-    font-family: monospace; 
-    color: #475569; 
-    margin-right: 4px; 
-    display: inline-block; 
+.rule-tag {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+    color: #475569;
+    margin-right: 4px;
+    display: inline-block;
     margin-bottom: 2px;
 }
 
 /* --- ESTILOS DE VISTA DE ÁRBOL (CONTRACT TREE) --- */
-
 .contract-tree {
-    list-style: none; /* Elimina viñetas por defecto */
+    list-style: none;
     padding-left: 0;
     font-size: 13px;
     line-height: 1.6;
@@ -330,8 +327,8 @@ tr:last-child td { border-bottom: none; }
 
 .nested-list {
     list-style: none;
-    padding-left: 20px; /* Sangría para anidamiento */
-    border-left: 1px dashed var(--border-color); /* Línea de conexión visual */
+    padding-left: 20px;
+    border-left: 1px dashed var(--border-color);
     margin-left: 8px;
 }
 
@@ -339,7 +336,6 @@ tr:last-child td { border-bottom: none; }
     padding: 2px 0;
 }
 
-/* Etiqueta del nodo (Objetos/Arrays) */
 .tree-label {
     font-weight: 600;
     color: var(--text-primary);
@@ -350,31 +346,17 @@ tr:last-child td { border-bottom: none; }
 .tree-object > .tree-label { background: #f0f9ff; color: #1d4ed8; }
 .tree-array > .tree-label { background: #fffbeb; color: #b45309; }
 
-/* Nodos Primitivos (Clave: Valor) */
-.tree-primitive {
-    color: var(--text-muted);
-}
-.tree-key {
-    font-weight: 500;
-    color: var(--text-primary);
-}
-.tree-value {
-    font-weight: 700;
-}
+.tree-primitive { color: var(--text-muted); }
+.tree-key { font-weight: 500; color: var(--text-primary); }
+.tree-value { font-weight: 700; }
 
-/* Estilos por tipo de valor */
 .tree-type-number { color: #059669; }
 .tree-type-string { color: #b91c1c; }
 .tree-type-boolean { color: #0ea5e9; }
 
 /* --- ESTILOS DE COLAPSADO (TOGGLE) --- */
+.nested-list { display: none; }
 
-/* Escondemos las listas anidadas por defecto */
-.nested-list {
-    display: none; 
-}
-
-/* Indicador de colapso/expansión */
 .tree-toggle {
     display: inline-block;
     width: 12px;
@@ -382,25 +364,15 @@ tr:last-child td { border-bottom: none; }
     cursor: pointer;
     font-weight: 900;
     color: var(--accent-color);
-    user-select: none; /* Prevenir selección de texto */
+    user-select: none;
 }
 
-/* El nodo que está expandido tiene la lista visible */
-.tree-label.expanded + .nested-list {
-    display: block;
-}
+.tree-label.expanded + .nested-list { display: block; }
 
-/* Estilo para los nodos que no tienen hijos (hojas) */
-.tree-primitive .tree-toggle {
-    visibility: hidden; /* Ocultar el icono si no hay nada que colapsar */
-}
+.tree-primitive .tree-toggle { visibility: hidden; }
 
 /* --- ESTILOS DE RULE CATALOG --- */
-
-.rule-card {
-    /* Quitamos margin-bottom: 20px; ya que el layout lo gestionará */
-    background: #7e22ce;
-}
+.rule-card { background: #7e22ce; }
 
 .rule-title {
     color: var(--accent-color);
@@ -431,29 +403,26 @@ tr:last-child td { border-bottom: none; }
 }
 
 .rule-param .k {
-    font-family: system-ui, sans-serif; /* Usar fuente normal, no monospace */
+    font-family: system-ui, sans-serif;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-/* --- ESTILOS DE RULE CATALOG CON TOC (CORREGIDOS Y SIMPLIFICADOS) --- */
-
+/* --- ESTILOS DE RULE CATALOG CON TOC --- */
 .rule-catalog-layout {
     display: flex;
-    height: 100%; 
+    height: 100%;
     width: 100%;
 }
 
-/* Sidebar de la Tabla de Contenidos (TOC) */
 .rule-toc-sidebar {
-    width: 200px; 
+    width: 200px;
     flex-shrink: 0;
     padding: 20px 15px;
     background: var(--bg-secondary);
     border-right: 1px solid var(--border-color);
-    /* Se mantienen fijos y usan el 100% del espacio de la pestaña */
-    height: 100%; 
-    overflow-y: auto; 
+    height: 100%;
+    overflow-y: auto;
 }
 
 .rule-toc-sidebar h4 {
@@ -464,10 +433,7 @@ tr:last-child td { border-bottom: none; }
     font-weight: 700;
 }
 
-.toc-nav {
-    display: flex;
-    flex-direction: column;
-}
+.toc-nav { display: flex; flex-direction: column; }
 
 .toc-link {
     text-decoration: none;
@@ -477,20 +443,89 @@ tr:last-child td { border-bottom: none; }
     transition: color 0.2s;
 }
 
-.toc-link:hover {
-    color: var(--accent-color);
-}
+.toc-link:hover { color: var(--accent-color); }
 
-/* Área principal donde se muestran los detalles de las reglas */
 .rule-content-area {
     flex-grow: 1;
-    /* CRÍTICO: Aquí es donde aplicamos el padding para el contenido */
-    padding: 20px 30px; 
-    height: 100%; /* Toma el 100% de la altura disponible */
-    overflow-y: auto; /* ESTO HACE QUE SOLO EL CONTENIDO PRINCIPAL HAGA SCROLL */
+    padding: 20px 30px;
+    height: 100%;
+    overflow-y: auto;
 }
 
-/* Ajuste del borde superior de la tarjeta de la regla */
-.rule-card {
-    margin-bottom: 30px;
+.rule-card { margin-bottom: 30px; }
+
+/* --- Tabla Columns específica --- */
+.tab-content #tab-columns table.columns-table {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: var(--surface, #fff);
+    overflow: hidden;
+}
+
+.tab-content #tab-columns table.columns-table thead th,
+.tab-content #tab-columns table.columns-table tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(15,23,42,0.03);
+    font-size: 14px;
+    color: var(--text, #0f172a);
+}
+
+.columns-table td.col-sensitive {
+    width: 10%;
+    text-align: center;
+    padding: 12px 8px;
+}
+
+.columns-table td.col-sensitive .badge-pii,
+.columns-table td.col-sensitive .badge-qid {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+/* =========================
+   FIX SCROLL (Tabs / Columns)
+   ========================= */
+
+/* Cadena de alturas para que overflow funcione */
+html, body { height: 100%; }
+.wrap, .pane, #viewerPane { min-height: 0; }
+
+/* tab-content debe ser flex para que el tab-pane activo pueda “llenar” */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden; /* mantenemos sin scroll global */
+}
+
+/* El tab-pane activo ocupa el alto disponible; los otros siguen ocultos */
+.tab-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden; /* cada pestaña decide su scroll interno */
+}
+
+/* ---- Columns: toolbar fija + cuerpo con scroll ---- */
+#tab-columns {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#tab-columns .toolbar {
+  flex: 0 0 auto;
+}
+
+#tab-columns .columns-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }

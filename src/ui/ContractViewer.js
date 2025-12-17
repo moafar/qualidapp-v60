@@ -112,64 +112,65 @@ export class ContractViewer {
         this.containerOverview.innerHTML = html;
     }
 
-/**
-     * Renderiza la pestaña "Columns" (Tabla Editable o Leible)
-     */
     renderColumns(contract, filterText = '', filterCrit = '', filterType = '') {
-        if (!contract.columns) {
-            this.containerColumns.innerHTML = `<div class="tab-pane" style="text-align:center; color:var(--text-muted)">Contrato vacío. Añade una columna en modo edición.</div>`;
+        // OJO: en vez de pintar sobre #tab-columns, pintamos sobre su área scrolleable
+        const scrollArea = this.containerColumns.querySelector('.columns-scroll');
+
+        if (!scrollArea) {
+            console.error('No se encontró .columns-scroll dentro de #tab-columns');
             return;
         }
-        
+
+        if (!contract.columns) {
+            scrollArea.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">
+            Contrato vacío. Añade una columna en modo edición.
+            </div>`;
+            return;
+        }
+
         let cols = contract.columns;
 
-        // Filtros (solo en modo lectura)
         if (!this.isEditMode && (filterText || filterCrit || filterType)) {
             cols = cols.filter(c => {
-                const matchText =
-                    (c.name || '').toLowerCase().includes((filterText || '').toLowerCase()) ||
-                    (c.description || '').toLowerCase().includes((filterText || '').toLowerCase());
+            const matchText =
+                (c.name || '').toLowerCase().includes((filterText || '').toLowerCase()) ||
+                (c.description || '').toLowerCase().includes((filterText || '').toLowerCase());
 
-                const matchCrit = filterCrit ? c.criticality === filterCrit : true;
+            const matchCrit = filterCrit ? c.criticality === filterCrit : true;
+            const matchType = filterType ? c.expected_type === filterType : true;
 
-                // NUEVO: filtro por tipo (expected_type)
-                const matchType = filterType ? c.expected_type === filterType : true;
-
-                return matchText && matchCrit && matchType;
+            return matchText && matchCrit && matchType;
             });
         }
 
-        const rows = cols.map((col, index) => {
-            if (this.isEditMode) {
-                return this._renderRowEdit(col, index);
-            } else {
-                return this._renderRowRead(col);
-            }
-        }).join('');
+        const rows = cols.map((col, index) => (
+            this.isEditMode ? this._renderRowEdit(col, index) : this._renderRowRead(col)
+        )).join('');
 
-        // Botón de Añadir Columna
-        const addBtn = this.isEditMode 
-            ? `<tr><td colspan="6" style="text-align:center; padding:10px;"><button class="btn-header" data-action="add-col">+ Añadir Columna</button></td></tr>` 
+        const addBtn = this.isEditMode
+            ? `<tr><td colspan="6" style="text-align:center; padding:10px;">
+                <button class="btn-header" data-action="add-col">+ Añadir Columna</button>
+            </td></tr>`
             : '';
 
-        // --- INYECCIÓN DE TOOLTIPS EN ENCABEZADOS (TH) ---
-        // Usamos el atributo data-tooltip directamente en los TH.
-        this.containerColumns.innerHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th width="20%" data-tooltip="Nombre exacto de la columna en el dataset.">Columna</th>
-                        <th width="10%" data-tooltip="Tipo de dato esperado (text, numeric, date, etc.).">Tipo</th>
-                        <th width="10%" data-tooltip="Importancia de la columna. Un fallo High detiene el proceso.">Criticidad</th>
-                        <th width="35%" data-tooltip="Descripción funcional del campo.">Descripción</th>
-                        <th width="20%" data-tooltip="Reglas de validación aplicadas a esta columna (Ej: required, range, regex).">Reglas</th>
-                        ${this.isEditMode ? '<th width="50px"></th>' : ''} 
-                    </tr>
-                </thead>
-                <tbody>${rows}${addBtn}</tbody>
+        scrollArea.innerHTML = `
+            <table class="columns-table">
+            <thead>
+                <tr>
+                <th width="15%" data-tooltip="Nombre exacto de la columna en el dataset.">Columna</th>
+                <th width="15%" data-tooltip="Indica si la columna contiene datos sensibles.">Sensitive</th>
+                <th width="10%" data-tooltip="Tipo de dato esperado (text, numeric, date, etc.).">Tipo</th>
+                <th width="10%" data-tooltip="Importancia de la columna. Un fallo High detiene el proceso.">Criticidad</th>
+                <th width="30%" data-tooltip="Descripción funcional del campo.">Descripción</th>
+                <th width="20%" data-tooltip="Reglas de validación aplicadas a esta columna (Ej: required, range, regex).">Reglas</th>
+                ${this.isEditMode ? '<th width="50px"></th>' : ''}
+                </tr>
+            </thead>
+            <tbody>${rows}${addBtn}</tbody>
             </table>
         `;
     }
+
 
     // Renderizado simple de las otras pestañas (placeholders)
     renderTree(contract) {
@@ -185,64 +186,81 @@ export class ContractViewer {
     // ------------------------------------
     
     _renderRowRead(col) {
-        const typeClass = `b-${col.expected_type || 'text'}`;
-        const critColor = col.criticality === 'high' ? 'var(--crit-high-fg)' : 'var(--text-muted)';
-        
-        // --- Diccionario simulado de descripciones de Reglas ---
-        const RULE_DESCRIPTIONS = {
-            'required': 'Asegura que la columna no contenga valores nulos o vacíos.',
-            'range': 'Valida que los valores numéricos se encuentren dentro de un rango [min, max] definido.',
-            'regex': 'Asegura que el formato de la cadena de texto coincida con un patrón específico.',
-            'default': 'Regla de validación estándar. Haz clic para más detalles.'
-        };
-        // --------------------------------------------------------
+    const typeClass = `b-${col.expected_type || 'text'}`;
+    const critColor =
+        col.criticality === 'high'
+        ? 'var(--crit-high-fg)'
+        : col.criticality === 'medium'
+        ? 'var(--crit-med-fg)'
+        : 'var(--crit-low-fg)';
 
-        // Lógica para Reglas
-        const rulesHtml = (col.rules || [])
-            .map(r => {
-                const ruleId = r.id;
-                const description = RULE_DESCRIPTIONS[ruleId] || RULE_DESCRIPTIONS['default'];
+    // Detecta sensibilidad desde el nuevo campo escalar
+    const s = (col.sensitivity || '').toLowerCase();
 
-                // 1. Construir el contenido del tooltip (SOLO TEXTO)
-                let tooltipContent = `<strong style="font-size:13px;">Regla: ${ruleId}</strong><br>`;
-                tooltipContent += `<span style="color:#a0aec0;">Descripción:</span> ${description}<br>`;
-                
-                // Añadir parámetros específicos
-                for (const key in r) {
-                    if (key !== 'id' && typeof r[key] !== 'object') { 
-                        tooltipContent += `<span style="color:#a0aec0;">${key}:</span> ${r[key]}<br>`;
-                    }
-                }
-                
-                // 2. Renderizar la etiqueta CON EL ENLACE DE ACCIÓN Y EL TOOLTIP
-                return `<div 
-                            class="rule-tag" 
-                            style="cursor:pointer;"
-                            data-tooltip="${tooltipContent.replace(/"/g, '&quot;')}"
-                            data-action="show-catalog"
-                            data-rule-id="${ruleId}">
-                            ${ruleId}
-                        </div>`;
-            })
-            .join('');
+    const sensitiveBadge =
+        s === 'pii'
+            ? `<span class="badge badge-pii">PII</span>`
+            : s === 'quasi_identifier'
+            ? `<span class="badge badge-qid">QID</span>`
+            : '—';
 
-        // 3. Renderizar la fila
-        return `
-            <tr>
-                <td><code style="font-weight:bold;">${col.name}</code></td>
-                <td><span class="badge ${typeClass}">${col.expected_type || 'text'}</span></td>
-                <td style="color:${critColor}; font-weight:600; font-size:12px;">${col.criticality || 'low'}</td>
-                <td style="color:var(--text-muted)">${col.description || '—'}</td>
-                <td>${rulesHtml}</td>
-            </tr>
-        `;
+    const RULE_DESCRIPTIONS = {
+        required: 'Asegura que la columna no contenga valores nulos o vacíos.',
+        range: 'Valida que los valores numéricos se encuentren dentro de un rango [min, max] definido.',
+        regex: 'Asegura que el formato de la cadena de texto coincida con un patrón específico.',
+        default: 'Regla de validación estándar. Haz clic para más detalles.',
+    };
+
+    const rulesHtml = (col.rules || [])
+        .map((r) => {
+        const ruleId = r.id;
+        const description = RULE_DESCRIPTIONS[ruleId] || RULE_DESCRIPTIONS.default;
+
+        let tooltipContent = `<strong style="font-size:13px;">Regla: ${ruleId}</strong><br>`;
+        tooltipContent += `<span style="color:#a0aec0;">Descripción:</span> ${description}<br>`;
+
+        for (const key in r) {
+            if (key !== 'id' && typeof r[key] !== 'object') {
+            tooltipContent += `<span style="color:#a0aec0;">${key}:</span> ${r[key]}<br>`;
+            }
+        }
+
+        return `<div
+                    class="rule-tag"
+                    style="cursor:pointer;"
+                    data-tooltip="${tooltipContent.replace(/"/g, '&quot;')}"
+                    data-action="show-catalog"
+                    data-rule-id="${ruleId}">
+                    ${ruleId}
+                </div>`;
+        })
+        .join('');
+
+    return `
+        <tr>
+        <td><code style="font-weight:bold;">${col.name}</code></td>
+        <td class="col-sensitive">${sensitiveBadge || ''}</td>
+        <td><span class="badge ${typeClass}">${col.expected_type || 'text'}</span></td>
+        <td style="color:${critColor}; font-weight:600; font-size:12px;">${col.criticality || 'low'}</td>
+        <td style="color:var(--text-muted)">${col.description || '—'}</td>
+        <td>${rulesHtml}</td>
+        </tr>
+    `;
     }
+
 
     _renderRowEdit(col, index) {
         // Renderiza el modo edición (inputs para cambio bidireccional)
         return `
             <tr>
                 <td><input type="text" class="edit-col" data-idx="${index}" data-field="name" value="${col.name || ''}" style="width:100%"></td>
+                <td>
+                    <select class="edit-col" data-idx="${index}" data-field="sensitivity" style="width:100%">
+                        <option value="" ${(col.sensitivity || '')==='' ? 'selected' : ''}>—</option>
+                        <option value="pii" ${col.sensitivity==='pii' ? 'selected' : ''}>PII</option>
+                        <option value="quasi_identifier" ${col.sensitivity==='quasi_identifier' ? 'selected' : ''}>QID</option>
+                    </select>
+                </td>
                 <td>
                     <select class="edit-col" data-idx="${index}" data-field="expected_type" style="width:100%">
                         <option value="text" ${col.expected_type==='text'?'selected':''}>text</option>
@@ -282,8 +300,18 @@ export class ContractViewer {
             const idx = target.dataset.idx;
             const field = target.dataset.field;
             if (this.currentContract.columns[idx]) {
-                this.currentContract.columns[idx][field] = target.value;
+                if (field === 'sensitivity') {
+                    const v = (target.value || '').trim();
+                    if (v === '') {
+                        delete this.currentContract.columns[idx].sensitivity;
+                    } else {
+                        this.currentContract.columns[idx].sensitivity = v;
+                    }
+                } else {
+                    this.currentContract.columns[idx][field] = target.value;
+                }
             }
+
         }
         
         // 2. Edición de Metadatos (Resumen)
