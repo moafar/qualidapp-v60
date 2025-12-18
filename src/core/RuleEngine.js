@@ -28,7 +28,7 @@ export class RuleEngine {
         return this.rules;
     }
 
-/**
+    /**
      * Ejecuta la validación para una columna dada.
      * @param {string} columnName - Nombre de la columna.
      * @param {Array<*>} data - Los datos de esa columna.

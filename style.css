@@ -372,7 +372,7 @@ tr:last-child td { border-bottom: none; }
 .tree-primitive .tree-toggle { visibility: hidden; }
 
 /* --- ESTILOS DE RULE CATALOG --- */
-.rule-card { background: #7e22ce; }
+.rule-card { background: #f8f7f9; }
 
 .rule-title {
     color: var(--accent-color);
