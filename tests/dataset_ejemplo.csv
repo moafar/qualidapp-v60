@@ -1,0 +1,12 @@
+id,value,extra
+1,10,foo
+2,-5,bar
+2,20,baz
+,15,qux
+4,25,quux
+5,30,corge
+6,,grault
+7,40,garply
+8,50,waldo
+9,60,fred
+10,70,plugh
