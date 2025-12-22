@@ -48,13 +48,21 @@ export class ContractViewer {
         // Renderizamos las vistas activas
         this.renderOverview(contract);
         this.renderColumns(contract);
-        this.renderTree(contract); // Agregado para que sepas dónde pintar el árbol
-        this.renderCatalog(contract); // Agregado para el catálogo
+        this.renderTree(contract);
+        this.renderCatalog(contract);
 
-        // Actualizar versión en header
-        const ver = contract.contract_version || '1.0';
+        // Actualizar versión en header: mostrar la versión de la aplicación si está disponible
         const badge = document.getElementById('versionBadge');
-        if(badge) badge.textContent = `v${ver}`;
+        if (badge) {
+            // obtener versión de la app (cacheada)
+            this.getAppVersion().then(appVer => {
+                const ver = appVer || (contract.contract_version || '1.0');
+                badge.textContent = `v${ver}`;
+            }).catch(() => {
+                const ver = contract.contract_version || '1.0';
+                badge.textContent = `v${ver}`;
+            });
+        }
     }
 
     // ------------------------------------
@@ -278,7 +286,19 @@ export class ContractViewer {
                     </select>
                 </td>
                 <td><input type="text" class="edit-col" data-idx="${index}" data-field="description" value="${col.description || ''}" style="width:100%"></td>
-                <td style="text-align:center;"><button class="btn-header" data-action="del-col" data-idx="${index}" style="color:red; border:none; padding:5px 8px;">×</button></td>
+                <td style="text-align:center;">
+                    <div style="display:flex; gap:6px; justify-content:center; align-items:center;">
+                        <button class="btn-header" data-action="del-col" data-idx="${index}" style="color:red; border:none; padding:5px 8px;">×</button>
+                        <button class="btn-header" data-action="toggle-rules" data-idx="${index}" style="padding:5px 8px;">Editar Reglas</button>
+                    </div>
+                </td>
+            </tr>
+            <tr class="rules-row" data-idx="${index}" style="display:none; background:var(--bg-card);">
+                <td colspan="7" style="padding:8px 12px;">
+                    <label style="display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;">Reglas (JSON editable) — ej: [{ "id": "range", "min": 0, "max": 100 }]</label>
+                    <textarea class="edit-rules" data-idx="${index}" style="width:100%; height:90px; font-family: monospace; font-size:12px;">${(col.rules && JSON.stringify(col.rules, null, 2)) || '[]'}</textarea>
+                    <div style="margin-top:6px; color:#666; font-size:12px;">Nota: escribe JSON válido. Si el JSON no es válido, no se aplicará hasta corregirlo.</div>
+                </td>
             </tr>
         `;
     }
@@ -314,6 +334,26 @@ export class ContractViewer {
 
         }
         
+        // 1.b Edición manual de reglas (textarea JSON)
+        if (target.classList.contains('edit-rules')) {
+            const idx = parseInt(target.dataset.idx, 10);
+            const raw = target.value || '';
+            try {
+                const parsed = JSON.parse(raw);
+                // Aceptamos solo arrays para `rules`
+                if (Array.isArray(parsed)) {
+                    this.currentContract.columns[idx].rules = parsed;
+                    target.style.borderColor = '';
+                } else {
+                    // marcar como inválido visualmente
+                    target.style.borderColor = 'crimson';
+                }
+            } catch (err) {
+                // JSON inválido — no aplicar cambios, solo marcar
+                target.style.borderColor = 'crimson';
+            }
+        }
+        
         // 2. Edición de Metadatos (Resumen)
         if (target.classList.contains('edit-meta')) {
             const path = target.dataset.path.split('.'); // ej: dataset.title o root.contract_version
@@ -346,6 +386,17 @@ export class ContractViewer {
                 const idx = parseInt(e.target.dataset.idx);
                 this.currentContract.columns.splice(idx, 1);
                 this.renderColumns(this.currentContract);
+            }
+            // Toggle mostrar/ocultar textarea de reglas
+            if (e.target.dataset.action === 'toggle-rules') {
+                const idx = parseInt(e.target.dataset.idx, 10);
+                // Buscar la fila .rules-row correspondiente dentro del tbody
+                const tbody = e.target.closest('tbody');
+                if (!tbody) return;
+                const ruleRow = tbody.querySelector(`tr.rules-row[data-idx="${idx}"]`);
+                if (ruleRow) {
+                    ruleRow.style.display = (ruleRow.style.display === 'none' || !ruleRow.style.display) ? 'table-row' : 'none';
+                }
             }
         }
         
@@ -418,5 +469,41 @@ export class ContractViewer {
         if(searchInput) searchInput.addEventListener('input', apply);
         if(critSelect) critSelect.addEventListener('change', apply);
         if(typeSelect) typeSelect.addEventListener('change', apply);
+    }
+
+    // Intenta resolver la versión de la aplicación.
+    async getAppVersion() {
+        if (this._appVersion) return this._appVersion;
+
+        // Intento 1: parsear CHANGELOG.md en busca de "## [x.y.z]" (acepta sufijos)
+        try {
+            const res = await fetch('/CHANGELOG.md', { cache: 'no-cache' });
+            if (res.ok) {
+                const txt = await res.text();
+                const m = txt.match(/##\s*\[([\d]+\.[\d]+\.[\d]+(?:[^\]]*)?)\]/);
+                if (m && m[1]) {
+                    this._appVersion = m[1];
+                    return this._appVersion;
+                }
+            }
+        } catch (e) {
+            // continuar con fallback
+        }
+
+        // Intento 2 (fallback robusto): comprobar archivos de release por GET (HEAD puede fallar en algunos servidores)
+        const candidates = ['/v1.3.0', '/v1.2.1', '/v1.2.0'];
+        for (const c of candidates) {
+            try {
+                const r = await fetch(c, { method: 'GET', cache: 'no-cache' });
+                if (r.ok) {
+                    this._appVersion = c.replace('/v', '');
+                    return this._appVersion;
+                }
+            } catch (e) {
+                // ignorar y seguir
+            }
+        }
+
+        return null;
     }
 }

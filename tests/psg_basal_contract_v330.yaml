@@ -50,6 +50,7 @@ columns:
   - id: required
   - id: regex
     pattern: ^[A-Z\s]+$
+  sensitivity: pii
 - name: pte_id
   expected_type: identifier
   criticality: high
@@ -59,6 +60,7 @@ columns:
   rules:
   - id: required
   - id: unique
+  sensitivity: pii
 - name: pte_imc
   expected_type: numeric
   criticality: medium
@@ -127,6 +129,7 @@ columns:
   - trim
   rules:
   - id: required
+  sensitivity: quasi_identifier
 - name: basal_fecha_estudio
   expected_type: datetime
   criticality: high

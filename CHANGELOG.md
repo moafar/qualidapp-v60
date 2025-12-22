@@ -1,5 +1,20 @@
 # Registro de versiones
 
+## [1.3.1] - 2025-12-22
+### Añadido
+- Persistencia de ediciones de reglas desde el editor JSON inline en la UI del contrato.
+  - `ContractViewer.flushRuleEdits()` ahora convierte/valida el contenido de los textareas `.rule-json-editor` y actualiza `this.currentContract.columns[idx].rules` antes del guardado.
+  - `UIManager.handleSaveClick` invoca `flushRuleEdits()` y aborta el guardado si hay errores de JSON.
+
+### Cambiado
+- Se revirtió temporalmente el intento de mostrar la versión de la app desde `CHANGELOG.md`; la UI sigue mostrando la versión del contrato hasta completar una implementación robusta.
+
+### Notas de compatibilidad / Breaking change
+- Ninguna breaking change funcional; comportamientos del contrato en disco se mantienen.
+
+### Documentación
+- Documentados los pasos para validar y guardar reglas editadas desde la UI en `src/ui/ContractViewer.js` y `src/ui/UIManager.js`.
+
 ## [1.3.0] - 2025-12-22
 ### Añadido
 - Soporte de parseo y normalización de fechas en `src/infrastructure/ExcelDatasetLoader.js`.
