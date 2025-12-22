@@ -171,7 +171,8 @@ header {
     display: grid;
     grid-template-columns: var(--editor-width) 10px 1fr;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .gutter {
@@ -199,7 +200,8 @@ header {
 
 /* Paneles */
 .pane {
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     background: var(--bg-card);
@@ -244,7 +246,8 @@ textarea:focus { background: #fff; }
 
 .tab-content {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .tab-pane {
@@ -509,7 +512,8 @@ html, body { height: 100%; }
 .tab-pane {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden; /* cada pestaña decide su scroll interno */
+  overflow-y: auto;
+  overflow-x: hidden; /* cada pestaña decide su scroll interno */
 }
 
 /* ---- Columns: toolbar fija + cuerpo con scroll ---- */
@@ -517,7 +521,8 @@ html, body { height: 100%; }
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #tab-columns .toolbar {
@@ -528,6 +533,7 @@ html, body { height: 100%; }
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  line-height: 1;
 }
 
 /* =========================
