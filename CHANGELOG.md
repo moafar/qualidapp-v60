@@ -1,5 +1,21 @@
 # Registro de versiones
 
+## [1.3.0] - 2025-12-22
+### Añadido
+- Soporte de parseo y normalización de fechas en `src/infrastructure/ExcelDatasetLoader.js`.
+  - `ExcelDatasetLoader.load(file, { parseDates = true, dateAsISOString = true })` ahora está disponible.
+  - Por defecto `parseDates` y `dateAsISOString` están activados y las fechas se normalizan a `YYYY-MM-DDTHH:mm:ssZ`.
+
+### Cambiado
+- Cambio por defecto en el comportamiento de carga de Excel/CSV: las celdas de fecha se tratan como `Date` y se exportan por defecto como cadenas ISO completas (`YYYY-MM-DDTHH:mm:ssZ`).
+
+### Notas de compatibilidad / Breaking change
+- Este cambio altera el formato de salida de columnas con fechas: antes podían llegar números seriales de Excel o cadenas, ahora por defecto se devolverán cadenas ISO con hora (si la celda no contiene hora, se normaliza a `00:00:00Z`).
+- Si algún consumidor dependía del formato anterior, ajuste su consumo o llame a `load(file, { parseDates: false })` para restaurar el comportamiento previo.
+
+### Documentación
+- JSDoc y código en `src/infrastructure/ExcelDatasetLoader.js` actualizados para reflejar las nuevas opciones.
+
 ## [1.2.0] - 2025-12-17
 ### Añadido
 - Nuevo campo escalar `sensitivity` a nivel de columna (`pii`, `quasi_identifier`) para representar datos sensibles de forma explícita.
