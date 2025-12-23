@@ -1,0 +1,149 @@
+[1mdiff --git a/style.css b/style.css[m
+[1mindex fdb5635..94572aa 100644[m
+[1m--- a/style.css[m
+[1m+++ b/style.css[m
+[36m@@ -85,6 +85,9 @@[m
+   --type-boolean-bg: #ecfdf5;[m
+   --type-boolean-fg: #047857;[m
+ [m
+[32m+[m[32m  --type-categorical-bg: #e9e8e5;[m[41m[m
+[32m+[m[32m  --type-categorical-fg: #4c3524;[m[41m[m
+[32m+[m[41m[m
+   /* Criticality (fg only) */[m
+   --crit-high-fg: #b91c1c;[m
+   --crit-med-fg: #d97706;[m
+[36m@@ -150,7 +153,7 @@[m [mheader {[m
+ [m
+ .brand-area h1 {[m
+   margin: 0;[m
+[31m-  font-size: 1.1rem;[m
+[32m+[m[32m  font-size: 18px;[m[41m[m
+   font-weight: 700;[m
+   color: var(--text-primary);[m
+ }[m
+[36m@@ -193,7 +196,7 @@[m [mheader {[m
+   align-items: center;[m
+ [m
+   cursor: pointer;[m
+[31m-  font-size: 0.9rem;[m
+[32m+[m[32m  font-size: 14px;[m[41m[m
+   font-weight: 500;[m
+   color: var(--text-muted);[m
+ [m
+[36m@@ -226,7 +229,7 @@[m [mheader {[m
+   background: #fff;[m
+ [m
+   color: var(--text-primary);[m
+[31m-  font-size: 0.85rem;[m
+[32m+[m[32m  font-size: 14px;[m[41m[m
+   font-weight: 600;[m
+ [m
+   cursor: pointer;[m
+[36m@@ -321,7 +324,7 @@[m [mtextarea {[m
+   outline: none;[m
+ [m
+   font-family: Consolas, monospace;[m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+ [m
+   background: #fafafa;[m
+   color: var(--text-primary);[m
+[36m@@ -352,7 +355,7 @@[m [mtextarea:focus {[m
+   background: var(--bg-card);[m
+ [m
+   color: var(--text-primary);[m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+ }[m
+ [m
+ /* Tabs container uses internal scroll per pane */[m
+[36m@@ -384,7 +387,7 @@[m [mtable {[m
+   border-collapse: separate;[m
+   border-spacing: 0;[m
+ [m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+   background: var(--bg-card);[m
+ [m
+   border: 1px solid var(--border-color);[m
+[36m@@ -452,6 +455,10 @@[m [mtr:last-child td {[m
+   background: var(--type-boolean-bg);[m
+   color: var(--type-boolean-fg);[m
+ }[m
+[32m+[m[32m.b-categorical {[m[41m[m
+[32m+[m[32m  background: var(--type-categorical-bg);[m[41m[m
+[32m+[m[32m  color: var(--type-categorical-fg);[m[41m[m
+[32m+[m[32m}[m[41m[m
+ [m
+ /* Sensitivity */[m
+ .badge-pii {[m
+[36m@@ -535,7 +542,7 @@[m [mtr:last-child td {[m
+   list-style: none;[m
+   padding-left: 0;[m
+ [m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+   line-height: 1.6;[m
+   font-family: monospace;[m
+ }[m
+[36m@@ -635,13 +642,13 @@[m [mtr:last-child td {[m
+ .rule-description {[m
+   margin-bottom: 15px;[m
+   color: var(--text-muted);[m
+[31m-  font-size: 14px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+ }[m
+ [m
+ .rule-card h4 {[m
+   margin-bottom: 8px;[m
+ [m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+   font-weight: 600;[m
+   color: var(--text-primary);[m
+ }[m
+[36m@@ -682,7 +689,7 @@[m [mtr:last-child td {[m
+   margin-top: 0;[m
+   margin-bottom: 15px;[m
+ [m
+[31m-  font-size: 15px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+   font-weight: 700;[m
+   color: var(--text-primary);[m
+ }[m
+[36m@@ -697,7 +704,7 @@[m [mtr:last-child td {[m
+   text-decoration: none;[m
+ [m
+   color: var(--text-muted);[m
+[31m-  font-size: 13px;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+ [m
+   transition: color 0.2s;[m
+ }[m
+[36m@@ -791,7 +798,7 @@[m [mtr:last-child td {[m
+   padding: 6px 8px;[m
+   border: 1px solid #ddd;[m
+   border-radius: 6px;[m
+[31m-  font-size: 0.95rem;[m
+[32m+[m[32m  font-size: 14px;[m[41m[m
+ }[m
+ [m
+ .report-input {[m
+[36m@@ -800,7 +807,7 @@[m [mtr:last-child td {[m
+ [m
+ .muted {[m
+   color: #666;[m
+[31m-  font-size: 0.95rem;[m
+[32m+[m[32m  font-size: 14px;[m[41m[m
+ }[m
+ [m
+ /* Report groups */[m
+[36m@@ -859,7 +866,7 @@[m [mtr:last-child td {[m
+ .report-table {[m
+   width: 100%;[m
+   border-collapse: collapse;[m
+[31m-  font-size: 0.95rem;[m
+[32m+[m[32m  font-size: 12px;[m[41m[m
+ }[m
+ [m
+ .report-table thead th {[m
