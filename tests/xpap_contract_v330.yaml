@@ -1,0 +1,363 @@
+contract_version: 1.0-xlsx-proposal
+history:
+- version: '1.0'
+  date: 2025-12-13
+  author: AI Data Engineer
+  description: Versión inicial del contrato de datos para el dataset de estudios polisomnografía en titulación de CPAP/BPAP.
+- version: 1.0-xlsx-proposal
+  date: 2025-12-22
+  author: ChatGPT
+  description: Propuesta alineada con columnas reales del XLSX muestra_xpap_v330.xlsx; se ajustaron rangos/unidades según valores observados en la muestra.
+dataset:
+  id: stg_clisueno_xpap_estudio_xpap
+  title: Datos de Estudio de Polisomnografía en titulación de CPAP/BPAP
+  description: Conjunto de datos que contiene las métricas y resultados de polisomnografía
+    en titulación de CPAP/BPAP para pacientes, incluyendo datos demográficos y métricas de sueño.
+  owner: Equipo de Análisis de Sueño
+  domain: Salud / Sueño
+  tags:
+  - polisomnografia
+  - xpap
+  - diagnostico
+  - apnea
+  source_file: muestra_xpap_v330.xlsx
+  row_count_sample: 144
+  column_count: 35
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+rule_catalog:
+- id: required
+  description: El campo no puede ser nulo.
+- id: unique
+  description: Todos los valores en el campo deben ser únicos.
+- id: range
+  description: El valor debe estar dentro de un rango numérico.
+- id: domain
+  description: El valor debe estar dentro de una lista de valores permitidos.
+- id: regex
+  description: El valor debe cumplir con un patrón regex.
+columns:
+- name: pte_nombre
+  expected_type: text
+  criticality: high
+  description: Nombre completo del paciente.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: required
+  - id: regex
+    pattern: ^[A-Z\s]+$
+  sensitivity: pii
+- name: pte_id
+  expected_type: identifier
+  criticality: high
+  description: Identificación única del paciente.
+  normalization:
+  - trim
+  rules:
+  - id: required
+  - id: unique
+  sensitivity: pii
+- name: pte_imc
+  expected_type: numeric
+  criticality: medium
+  description: Índice de masa corporal (kg/m^2).
+  rules:
+  - id: required
+  - id: range
+    min: 10.0
+    max: 80.0
+- name: pte_anos_decimales
+  expected_type: numeric
+  criticality: medium
+  description: Edad del paciente en años (puede incluir decimales).
+  rules:
+  - id: required
+  - id: range
+    min: 0.0
+    max: 150.0
+- name: pte_peso_kg
+  expected_type: numeric
+  criticality: medium
+  description: Peso del paciente en kilogramos.
+  rules:
+  - id: required
+  - id: range
+    min: 10.0
+    max: 300.0
+- name: pte_talla_cm
+  expected_type: numeric
+  criticality: medium
+  description: Talla del paciente en centímetros.
+  rules:
+  - id: required
+  - id: range
+    min: 50.0
+    max: 250.0
+- name: pte_cuello_cm
+  expected_type: numeric
+  criticality: medium
+  description: Circunferencia de cuello del paciente en centímetros.
+  rules:
+  - id: range
+    min: 20.0
+    max: 80.0
+- name: pte_perimetro_abdominal_cm
+  expected_type: numeric
+  criticality: medium
+  description: Perímetro abdominal del paciente en centímetros.
+  rules:
+  - id: range
+    min: 40.0
+    max: 200.0
+- name: xpap_solicita
+  expected_type: text
+  criticality: medium
+  description: Profesional o servicio que solicita el estudio.
+  normalization:
+  - trim
+  rules:
+  - id: required
+- name: xpap_empresa
+  expected_type: categorical
+  criticality: medium
+  description: Asegurador/empresa asociada al estudio (origen administrativo).
+  normalization:
+  - trim
+  rules:
+  - id: required
+  sensitivity: quasi_identifier
+- name: xpap_fecha_estudio
+  expected_type: datetime
+  criticality: high
+  description: Fecha (y opcionalmente hora) de realización del estudio.
+  rules:
+  - id: required
+  - id: regex
+    pattern: ^\d{4}-\d{2}-\d{2}(\s\d{2}:\d{2}:\d{2})?$
+- name: xpap_epworth
+  expected_type: numeric
+  criticality: medium
+  description: Puntaje de la escala de somnolencia de Epworth (0-24).
+  rules:
+  - id: range
+    min: 0
+    max: 24
+- name: xpap_tiempo_en_cama
+  expected_type: numeric
+  criticality: high
+  description: Tiempo total en cama (minutos).
+  rules:
+  - id: required
+  - id: range
+    min: 0.0
+    max: 1440.0
+- name: xpap_tiempo_sueno
+  expected_type: numeric
+  criticality: high
+  description: Tiempo total de sueño (minutos).
+  rules:
+  - id: required
+  - id: range
+    min: 0.0
+    max: 1440.0
+- name: xpap_eficiencia_sueno
+  expected_type: numeric
+  criticality: high
+  description: 'Eficiencia del sueño: tiempo de sueño / tiempo en cama (proporción 0-1).'
+  rules:
+  - id: required
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_latencia_sueno_total
+  expected_type: numeric
+  criticality: medium
+  description: Latencia de sueño total (minutos) desde el inicio del registro hasta el inicio de sueño.
+  rules:
+  - id: range
+    min: 0.0
+    max: 300.0
+- name: xpap_latencia_sueno_rem
+  expected_type: numeric
+  criticality: medium
+  description: Latencia a sueño REM (minutos) desde el inicio del sueño hasta el primer episodio REM.
+  rules:
+  - id: range
+    min: 0.0
+    max: 600.0
+- name: xpap_indice_microalertamientos
+  expected_type: numeric
+  criticality: medium
+  description: Índice de microalertamientos (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_porcentaje_sueno_rem
+  expected_type: numeric
+  criticality: medium
+  description: Proporción del tiempo total de sueño en fase REM (0-1).
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_porcentaje_sueno_profundo
+  expected_type: numeric
+  criticality: medium
+  description: Proporción del tiempo total de sueño en sueño profundo (N3) (0-1).
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_iac
+  expected_type: numeric
+  criticality: medium
+  description: Índice de apneas centrales (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_iao
+  expected_type: numeric
+  criticality: medium
+  description: Índice de apneas obstructivas (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_iam
+  expected_type: numeric
+  criticality: medium
+  description: Índice de apneas mixtas (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_ih
+  expected_type: numeric
+  criticality: medium
+  description: Índice de hipopneas (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_iah
+  expected_type: numeric
+  criticality: high
+  description: Índice de apnea-hipopnea total (eventos por hora).
+  rules:
+  - id: required
+  - id: range
+    min: 0.0
+    max: 200.0
+- name: xpap_indice_desat_rem
+  expected_type: numeric
+  criticality: medium
+  description: Índice de desaturaciones en REM (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 600.0
+- name: xpap_indice_desat_nrem
+  expected_type: numeric
+  criticality: medium
+  description: Índice de desaturaciones en NREM (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 600.0
+- name: xpap_indice_desat_total
+  expected_type: numeric
+  criticality: medium
+  description: Índice total de desaturaciones (eventos por hora).
+  rules:
+  - id: range
+    min: 0.0
+    max: 600.0
+- name: xpap_numero_eventos_ah
+  expected_type: numeric
+  criticality: medium
+  description: Número total de eventos de apnea+hipopnea (conteo absoluto).
+  rules:
+  - id: range
+    min: 0.0
+    max: 5000.0
+- name: xpap_t90
+  expected_type: numeric
+  criticality: medium
+  description: Proporción del tiempo (0-1) con saturación por debajo de 90%.
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_t80
+  expected_type: numeric
+  criticality: medium
+  description: Proporción del tiempo (0-1) con saturación por debajo de 80%.
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_t70
+  expected_type: numeric
+  criticality: medium
+  description: Proporción del tiempo (0-1) con saturación por debajo de 70%.
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_marca_equipo
+  expected_type: categorical
+  criticality: medium
+  description: Marca del equipo usado en la titulación.
+  rules:
+  - id: range
+    min: 0.0
+    max: 1.0
+- name: xpap_tipo_mascara
+  expected_type: categorical
+  criticality: medium
+  description: Tipo de máscara utilizada durante la titulación.
+  rules:
+  - id: required
+- name: xpap_tamano_mascara
+  expected_type: categorical
+  criticality: medium
+  description: Tamaño de la máscara utilizada durante la titulación.
+  rules:
+  - id: required
+- name: xpap_presion_terapeutica
+  expected_type: text
+  criticality: high
+  description: Presión terapéutica recomendada (cm H2O).
+  rules:
+  - id: required
+- name: xpap_fuente
+  expected_type: text
+  criticality: low
+  description: Ruta o identificador del archivo fuente desde el cual se extrajo el registro.
+  normalization:
+  - trim
+  rules:
+  - id: required
+- name: xpap_uuid
+  expected_type: identifier
+  criticality: high
+  description: Identificador único del registro (UUID v4).
+  rules:
+  - id: required
+  - id: unique
+  - id: regex
+    pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+- name: xpap_version_control
+  expected_type: text
+  criticality: low
+  description: Texto de control de versión / trazabilidad del registro (p.ej., fecha de extracción o notas de edición).
+  normalization:
+  - trim
+  rules:
+  - id: required

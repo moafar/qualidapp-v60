@@ -1,525 +1,755 @@
+/* ==========================================================================
+   UI Stylesheet — Overview
+   --------------------------------------------------------------------------
+   Este archivo define los estilos globales de la aplicación y se organiza
+   por bloques funcionales claramente delimitados. Su objetivo es proporcionar
+   una base visual coherente, mantenible y predecible para toda la interfaz.
+
+   Secciones principales:
+   1. Tokens y variables CSS:
+      Definición centralizada de colores, tipografías, espaciados y constantes
+      de layout reutilizables en toda la aplicación.
+
+   2. Base y reset:
+      Normalización del comportamiento de elementos HTML y preparación de
+      contenedores flex/grid para layouts con scroll interno.
+
+   3. Estructura principal:
+      Estilos del encabezado, navegación por pestañas, botones de acción y
+      layout general con paneles redimensionables.
+
+   4. Componentes de interacción:
+      Botones, toolbars, pestañas y contenedores de contenido con gestión   
+      explícita del overflow.
+
+   5. Tablas y visualización de datos:
+      Estilos comunes para tablas, encabezados y celdas, garantizando
+      consistencia tipográfica y visual en vistas tabulares.
+
+   6. Chips / badges:
+      Sistema de etiquetas visuales para tipos de datos, sensibilidad,
+      criticidad y estados de validación, con ajustes contextuales según la
+      vista donde se utilicen.
+
+   7. Componentes de apoyo:
+      Cards, pares clave–valor, etiquetas inline y otros elementos auxiliares
+      utilizados en vistas descriptivas.
+
+   8. Vistas especializadas:
+      Árboles de estructura, catálogo de reglas, tablas específicas y vistas
+      de reporte, cada una con estilos acotados a su contexto funcional.
+
+   9. Gestión de scroll y layout avanzado:
+      Reglas específicas para asegurar comportamiento correcto de scroll en
+      layouts complejos basados en flex y grid.
+
+   El archivo evita dependencias implícitas entre secciones y prioriza la
+   legibilidad, el aislamiento de responsabilidades visuales y la extensibilidad.
+   ========================================================================== */
+
+
+/* --- 0) TOKENS / VARIABLES ------------------------------------------------ */
 :root {
-    /* --- Paleta de Colores Base --- */
-    --bg-body: #f8f9fa;
-    --bg-card: #ffffff;
-    --border-color: #e2e8f0;
-    --text-primary: #1e293b;
-    --text-muted: #64748b;
-    --accent-color: #2563eb;
-    --accent-hover: #1d4ed8;
+  /* Base surfaces */
+  --bg-body: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-secondary: #f8fafc;
 
-    /* --- Tipos de Datos (Badges) --- */
-    --type-identifier-bg: #f3e8ff; --type-identifier-fg: #7e22ce;
-    --type-text-bg: #dcfce7;       --type-text-fg: #15803d;
-    --type-numeric-bg: #dbeafe;    --type-numeric-fg: #1d4ed8;
-    --type-datetime-bg: #ffedd5;   --type-datetime-fg: #c2410c;
-    --type-boolean-bg: #ecfdf5;    --type-boolean-fg: #047857;
+  /* Borders */
+  --border-color: #e2e8f0;
 
-        /* --- Criticidad --- */
-    --crit-high-fg: #b91c1c;   /* rojo oscuro – riesgo / bloqueo */
-    --crit-med-fg:  #d97706;   /* ámbar intenso – advertencia */
-    --crit-low-fg:  #047857;   /* verde petróleo – estable */
+  /* Text */
+  --text-primary: #1e293b;
+  --text-muted: #64748b;
 
-    /* --- Sensibilidad (Badges) --- */
-    --sensitive-pii-bg: #fef3c7;
-    --sensitive-pii-fg: #92400e;
-    --sensitive-qid-bg: #ede9fe;
-    --sensitive-qid-fg: #5b21b6;
+  /* Accent */
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
 
-    /* --- Fondos secundarios --- */
-    --bg-secondary: #f8fafc;
+  /* Layout resizable */
+  --editor-width: 450px;
 
-    /* --- Layout Resizable (Configuración Inicial) --- */
-    --editor-width: 450px; /* Ancho inicial del editor */
+  /* Data type badges */
+  --type-identifier-bg: #f3e8ff;
+  --type-identifier-fg: #7e22ce;
+
+  --type-text-bg: #dcfce7;
+  --type-text-fg: #15803d;
+
+  --type-numeric-bg: #dbeafe;
+  --type-numeric-fg: #1d4ed8;
+
+  --type-datetime-bg: #ffedd5;
+  --type-datetime-fg: #c2410c;
+
+  --type-boolean-bg: #ecfdf5;
+  --type-boolean-fg: #047857;
+
+  /* Criticality (fg only) */
+  --crit-high-fg: #b91c1c;
+  --crit-med-fg: #d97706;
+  --crit-low-fg: #047857;
+
+  /* Sensitivity */
+  --sensitive-pii-bg: #fef3c7;
+  --sensitive-pii-fg: #92400e;
+
+  --sensitive-qid-bg: #ede9fe;
+  --sensitive-qid-fg: #5b21b6;
 }
 
-/* --- Badges de sensibilidad (FUERA de :root) --- */
-.badge-pii { background: var(--sensitive-pii-bg); color: var(--sensitive-pii-fg); }
-.badge-qid { background: var(--sensitive-qid-bg); color: var(--sensitive-qid-fg); }
-
-/* --- BASE --- */
+/* --- 1) BASE / RESET ------------------------------------------------------ */
+html,
 body {
-    font-family: system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-body);
-    color: var(--text-primary);
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+  height: 100%;
 }
 
-.hidden { display: none !important; }
+body {
+  margin: 0;
+  height: 100vh;
 
-/* --- 1. HEADER (UNIFICADO: Marca | Tabs | Acciones) --- */
+  display: flex;
+  flex-direction: column;
+
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Minimum height reset for nested flex/grid scroll containers */
+.wrap,
+.pane,
+#viewerPane {
+  min-height: 0;
+}
+
+/* --- 2) HEADER (brand | tabs | actions) ---------------------------------- */
 header {
-    height: 55px;
-    padding: 0 20px;
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  height: 55px;
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Área de Marca (Izquierda) */
+/* Brand area (left) */
 .brand-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 200px;
-}
-.brand-area h1 {
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 700;
-    color: var(--text-primary);
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Área de Acciones (Derecha) */
+.brand-area h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Actions area (right) */
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 200px;
-    justify-content: flex-end;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .action-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .v-separator {
-    width: 1px;
-    height: 24px;
-    background-color: var(--border-color);
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-color);
 }
 
-/* --- 2. TABS (EN EL HEADER) --- */
+/* --- 3) HEADER TABS ------------------------------------------------------- */
 .header-tabs {
-    display: flex;
-    height: 100%;
-    align-items: center;
-    padding: 0;
-    background: transparent;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: transparent;
 }
 
 .header-tabs .tab {
-    padding: 0 20px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
+  height: 100%;
+  padding: 0 20px;
+
+  display: flex;
+  align-items: center;
+
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
 }
 
 .header-tabs .tab:hover {
-    color: var(--accent-color);
-    background-color: #f8fafc;
+  color: var(--accent-color);
+  background-color: var(--bg-secondary);
 }
 
 .header-tabs .tab.active {
-    color: var(--accent-color);
-    border-bottom-color: var(--accent-color);
-    background-color: #f0f9ff;
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+  background-color: #f0f9ff;
 }
 
-/* --- 3. BOTONES --- */
+/* --- 4) BUTTONS ----------------------------------------------------------- */
 .btn-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: white;
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    height: 36px;
+  height: 36px;
+  padding: 8px 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-header:hover {
-    border-color: var(--accent-color);
-    background: #f8fafc;
-    color: var(--accent-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-color: var(--accent-color);
+  background: var(--bg-secondary);
+  color: var(--accent-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.btn-header:active { transform: translateY(0); }
+.btn-header:active {
+  transform: translateY(0);
+}
 
 .btn-primary {
-    background: var(--accent-color);
-    color: white;
-    border: 1px solid var(--accent-color);
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #fff;
 }
+
 .btn-primary:hover {
-    background: var(--accent-hover);
-    color: white;
+  background: var(--accent-hover);
+  color: #fff;
 }
 
-/* --- 4. LAYOUT PRINCIPAL Y RESIZE (WRAP, GUTTER) --- */
+/* --- 5) MAIN LAYOUT + RESIZE --------------------------------------------- */
 .wrap {
-    display: grid;
-    grid-template-columns: var(--editor-width) 10px 1fr;
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--editor-width) 10px 1fr;
+
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* Resize gutter */
 .gutter {
-    background-color: var(--border-color);
-    cursor: col-resize;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    z-index: 10;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--border-color);
+  cursor: col-resize;
+  transition: background-color 0.2s;
 }
 
-.gutter:hover, .gutter.dragging {
-    background-color: var(--accent-color);
-    box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
+.gutter:hover,
+.gutter.dragging {
+  background-color: var(--accent-color);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.4);
 }
 
 .gutter::after {
-    content: "⋮";
-    color: #94a3b8;
-    font-weight: bold;
-    pointer-events: none;
+  content: "⋮";
+  color: #94a3b8;
+  font-weight: 700;
+  pointer-events: none;
 }
-.gutter:hover::after { color: white; }
 
-/* Paneles */
+.gutter:hover::after {
+  color: #fff;
+}
+
+/* Panes */
 .pane {
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-card);
-}
-.pane:last-child {
-    background: var(--bg-body);
-}
-
-/* Editor Izquierdo */
-textarea {
-    flex: 1;
-    width: 100%;
-    border: none;
-    resize: none;
-    padding: 16px;
-    font-family: 'Consolas', monospace;
-    font-size: 13px;
-    background: #fafafa;
-    outline: none;
-    color: var(--text-primary);
-}
-textarea:focus { background: #fff; }
-
-/* --- 5. VISOR DERECHO (TOOLBAR, CONTENT) --- */
-.toolbar {
-    padding: 8px 20px;
-    background: #f8fafc;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.toolbar input, .toolbar select {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    color: var(--text-primary);
-    font-size: 13px;
-}
-
-.tab-content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.tab-pane {
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-/* --- 6. ESTILOS DE TABLA / BADGES --- */
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 13px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-}
-th {
-    text-align: left;
-    padding: 10px 12px;
-    background: #f8fafc;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-size: 11px;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border-color);
-}
-td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: top;
-}
-tr:last-child td { border-bottom: none; }
-
-.badge {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    display: inline-block;
-}
-.b-identifier { background: var(--type-identifier-bg); color: var(--type-identifier-fg); }
-.b-text { background: var(--type-text-bg); color: var(--type-text-fg); }
-.b-numeric { background: var(--type-numeric-bg); color: var(--type-numeric-fg); }
-.b-datetime { background: var(--type-datetime-bg); color: var(--type-datetime-fg); }
-.b-boolean { background: var(--type-boolean-bg); color: var(--type-boolean-fg); }
-
-.card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-}
-.kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px; margin-bottom: 8px; font-size: 13px; }
-.k { color: var(--text-muted); font-family: monospace; }
-
-.rule-tag {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-family: monospace;
-    color: #475569;
-    margin-right: 4px;
-    display: inline-block;
-    margin-bottom: 2px;
-}
-
-/* --- ESTILOS DE VISTA DE ÁRBOL (CONTRACT TREE) --- */
-.contract-tree {
-    list-style: none;
-    padding-left: 0;
-    font-size: 13px;
-    line-height: 1.6;
-    font-family: monospace;
-}
-
-.nested-list {
-    list-style: none;
-    padding-left: 20px;
-    border-left: 1px dashed var(--border-color);
-    margin-left: 8px;
-}
-
-.contract-tree li {
-    padding: 2px 0;
-}
-
-.tree-label {
-    font-weight: 600;
-    color: var(--text-primary);
-    cursor: default;
-    padding: 1px 4px;
-    border-radius: 4px;
-}
-.tree-object > .tree-label { background: #f0f9ff; color: #1d4ed8; }
-.tree-array > .tree-label { background: #fffbeb; color: #b45309; }
-
-.tree-primitive { color: var(--text-muted); }
-.tree-key { font-weight: 500; color: var(--text-primary); }
-.tree-value { font-weight: 700; }
-
-.tree-type-number { color: #059669; }
-.tree-type-string { color: #b91c1c; }
-.tree-type-boolean { color: #0ea5e9; }
-
-/* --- ESTILOS DE COLAPSADO (TOGGLE) --- */
-.nested-list { display: none; }
-
-.tree-toggle {
-    display: inline-block;
-    width: 12px;
-    margin-right: 5px;
-    cursor: pointer;
-    font-weight: 900;
-    color: var(--accent-color);
-    user-select: none;
-}
-
-.tree-label.expanded + .nested-list { display: block; }
-
-.tree-primitive .tree-toggle { visibility: hidden; }
-
-/* --- ESTILOS DE RULE CATALOG --- */
-.rule-card { background: #f8f7f9; }
-
-.rule-title {
-    color: var(--accent-color);
-    margin-top: 0;
-    margin-bottom: 5px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
-.rule-description {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 15px;
-}
-
-.rule-card h4 {
-    font-size: 13px;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-    font-weight: 600;
-}
-
-.rule-param {
-    margin-bottom: 5px;
-    border-left: 2px solid #a0aec0;
-    padding-left: 10px;
-    font-size: 12px;
-}
-
-.rule-param .k {
-    font-family: system-ui, sans-serif;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* --- ESTILOS DE RULE CATALOG CON TOC --- */
-.rule-catalog-layout {
-    display: flex;
-    height: 100%;
-    width: 100%;
-}
-
-.rule-toc-sidebar {
-    width: 200px;
-    flex-shrink: 0;
-    padding: 20px 15px;
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border-color);
-    height: 100%;
-    overflow-y: auto;
-}
-
-.rule-toc-sidebar h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 15px;
-    color: var(--text-primary);
-    font-weight: 700;
-}
-
-.toc-nav { display: flex; flex-direction: column; }
-
-.toc-link {
-    text-decoration: none;
-    color: var(--text-muted);
-    padding: 4px 0;
-    font-size: 13px;
-    transition: color 0.2s;
-}
-
-.toc-link:hover { color: var(--accent-color); }
-
-.rule-content-area {
-    flex-grow: 1;
-    padding: 20px 30px;
-    height: 100%;
-    overflow-y: auto;
-}
-
-.rule-card { margin-bottom: 30px; }
-
-/* --- Tabla Columns específica --- */
-.tab-content #tab-columns table.columns-table {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    background: var(--surface, #fff);
-    overflow: hidden;
-}
-
-.tab-content #tab-columns table.columns-table thead th,
-.tab-content #tab-columns table.columns-table tbody td {
-    padding: 12px 16px;
-    vertical-align: middle;
-    border-bottom: 1px solid rgba(15,23,42,0.03);
-    font-size: 14px;
-    color: var(--text, #0f172a);
-}
-
-.columns-table td.col-sensitive {
-    width: 10%;
-    text-align: center;
-    padding: 12px 8px;
-}
-
-.columns-table td.col-sensitive .badge-pii,
-.columns-table td.col-sensitive .badge-qid {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    padding: 4px 8px;
-}
-
-/* =========================
-   FIX SCROLL (Tabs / Columns)
-   ========================= */
-
-/* Cadena de alturas para que overflow funcione */
-html, body { height: 100%; }
-.wrap, .pane, #viewerPane { min-height: 0; }
-
-/* tab-content debe ser flex para que el tab-pane activo pueda “llenar” */
-.tab-content {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden; /* mantenemos sin scroll global */
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: var(--bg-card);
 }
 
-/* El tab-pane activo ocupa el alto disponible; los otros siguen ocultos */
+.pane:last-child {
+  background: var(--bg-body);
+}
+
+/* Editor pane */
+textarea {
+  flex: 1;
+  width: 100%;
+  padding: 16px;
+
+  border: none;
+  resize: none;
+  outline: none;
+
+  font-family: Consolas, monospace;
+  font-size: 13px;
+
+  background: #fafafa;
+  color: var(--text-primary);
+}
+
+textarea:focus {
+  background: #fff;
+}
+
+/* --- 6) VIEWER: TOOLBAR + TABS CONTENT ----------------------------------- */
+.toolbar {
+  padding: 8px 20px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.toolbar input,
+.toolbar select {
+  padding: 6px 12px;
+
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+/* Tabs container uses internal scroll per pane */
+.tab-content {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+}
+
 .tab-pane {
   flex: 1 1 auto;
   min-height: 0;
+
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+
   overflow-y: auto;
-  overflow-x: hidden; /* cada pestaña decide su scroll interno */
+  overflow-x: hidden;
 }
 
-/* ---- Columns: toolbar fija + cuerpo con scroll ---- */
+/* --- 7) TABLES ------------------------------------------------------------ */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  font-size: 13px;
+  background: var(--bg-card);
+
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+th {
+  padding: 10px 12px;
+  text-align: left;
+
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+td {
+  padding: 10px 12px;
+  vertical-align: top;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- 8) BADGES / CHIPS ---------------------------------------------------- */
+/* Base badge style shared by type, sensitivity and report tags */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1.4;
+
+  font-size: 0.85rem;
+}
+
+/* Data types */
+.b-identifier {
+  background: var(--type-identifier-bg);
+  color: var(--type-identifier-fg);
+}
+.b-text {
+  background: var(--type-text-bg);
+  color: var(--type-text-fg);
+}
+.b-numeric {
+  background: var(--type-numeric-bg);
+  color: var(--type-numeric-fg);
+}
+.b-datetime {
+  background: var(--type-datetime-bg);
+  color: var(--type-datetime-fg);
+}
+.b-boolean {
+  background: var(--type-boolean-bg);
+  color: var(--type-boolean-fg);
+}
+
+/* Sensitivity */
+.badge-pii {
+  background: var(--sensitive-pii-bg);
+  color: var(--sensitive-pii-fg);
+}
+.badge-qid {
+  background: var(--sensitive-qid-bg);
+  color: var(--sensitive-qid-fg);
+}
+
+/* Report badges */
+.badge-error {
+  background: #fdecea;
+  border-color: #f5c6cb;
+  color: #b71c1c;
+  font-size: 11px;
+}
+.badge-warning {
+  background: #fff4e5;
+  border-color: #ffe0b2;
+  color: #e65100;
+    font-size: 11px;
+}
+.badge-info {
+  background: #e8f4fd;
+  border-color: #b3e5fc;
+  color: #01579b;
+  font-size: 11px;
+}
+
+/* Columns table requires a uniform chip size between large and small variants */
+#tab-columns .badge,
+#tab-columns [class^="b-"] {
+  font-size: 0.75rem;
+  padding: 3px 7px;
+}
+
+/* --- 9) CARDS / KEY-VALUE ------------------------------------------------- */
+.card {
+  padding: 16px;
+  margin-bottom: 16px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px;
+
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.k {
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* Inline rule tag styling */
+.rule-tag {
+  display: inline-block;
+  margin-right: 4px;
+  margin-bottom: 2px;
+
+  padding: 1px 5px;
+  border-radius: 3px;
+
+  font-family: monospace;
+  color: #475569;
+
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* --- 10) CONTRACT TREE ---------------------------------------------------- */
+.contract-tree {
+  list-style: none;
+  padding-left: 0;
+
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: monospace;
+}
+
+.contract-tree li {
+  padding: 2px 0;
+}
+
+/* Nested lists are collapsed by default; expansion is controlled via .expanded */
+.nested-list {
+  list-style: none;
+  padding-left: 20px;
+  margin-left: 8px;
+
+  border-left: 1px dashed var(--border-color);
+  display: none;
+}
+
+.tree-label {
+  padding: 1px 4px;
+  border-radius: 4px;
+
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: default;
+}
+
+.tree-object > .tree-label {
+  background: #f0f9ff;
+  color: #1d4ed8;
+}
+
+.tree-array > .tree-label {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.tree-primitive {
+  color: var(--text-muted);
+}
+
+.tree-key {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.tree-value {
+  font-weight: 700;
+}
+
+.tree-type-number {
+  color: #059669;
+}
+.tree-type-string {
+  color: #b91c1c;
+}
+.tree-type-boolean {
+  color: #0ea5e9;
+}
+
+/* Toggle control used to expand/collapse nested lists */
+.tree-toggle {
+  display: inline-block;
+  width: 12px;
+  margin-right: 5px;
+
+  cursor: pointer;
+  user-select: none;
+
+  font-weight: 900;
+  color: var(--accent-color);
+}
+
+.tree-label.expanded + .nested-list {
+  display: block;
+}
+
+.tree-primitive .tree-toggle {
+  visibility: hidden;
+}
+
+/* --- 11) RULE CATALOG ----------------------------------------------------- */
+.rule-card {
+  background: #f8f7f9;
+  margin-bottom: 30px;
+}
+
+.rule-title {
+  margin-top: 0;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+
+  color: var(--accent-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rule-description {
+  margin-bottom: 15px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.rule-card h4 {
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rule-param {
+  margin-bottom: 5px;
+  padding-left: 10px;
+
+  border-left: 2px solid #a0aec0;
+  font-size: 12px;
+}
+
+.rule-param .k {
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Rule catalog with TOC layout */
+.rule-catalog-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.rule-toc-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+
+  padding: 20px 15px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+}
+
+.rule-toc-sidebar h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.toc-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-link {
+  padding: 4px 0;
+  text-decoration: none;
+
+  color: var(--text-muted);
+  font-size: 13px;
+
+  transition: color 0.2s;
+}
+
+.toc-link:hover {
+  color: var(--accent-color);
+}
+
+.rule-content-area {
+  flex-grow: 1;
+  height: 100%;
+  overflow-y: auto;
+
+  padding: 20px 30px;
+}
+
+/* --- 12) COLUMNS TABLE (minimal overrides) -------------------------------- */
+/* Fixed layout avoids extremely wide columns when content is long */
+#tab-columns .columns-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Long values are allowed to wrap rather than forcing horizontal overflow */
+#tab-columns .columns-table th,
+#tab-columns .columns-table td {
+  overflow-wrap: anywhere;
+}
+
+/* Sensitivity column keeps a stable width while remaining consistent with table styles */
+#tab-columns .columns-table td.col-sensitive {
+  width: 10%;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+#tab-columns .columns-table td.col-sensitive .badge-pii,
+#tab-columns .columns-table td.col-sensitive .badge-qid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.75rem;
+  padding: 3px 7px;
+}
+
+/* --- 13) FIX SCROLL (Tabs / Columns) ------------------------------------- */
 #tab-columns {
   display: flex;
   flex-direction: column;
+
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -532,34 +762,27 @@ html, body { height: 100%; }
 #tab-columns .columns-scroll {
   flex: 1 1 auto;
   min-height: 0;
+
   overflow-y: auto;
   line-height: 1;
 }
 
-/* =========================
-   Reporte v2 (ValidationReportViewer)
-   ========================= */
-
+/* --- 14) REPORT v2 (ValidationReportViewer) ------------------------------- */
 .report-header {
+  margin-top: 10px;
+
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  align-items: center;
-  margin-top: 10px;
 }
 
-.report-counters {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
+.report-counters,
 .report-controls {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -580,50 +803,25 @@ html, body { height: 100%; }
   font-size: 0.95rem;
 }
 
-/* Badges */
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  border: 1px solid transparent;
-}
-
-.badge-error {
-  background: #fdecea;
-  border-color: #f5c6cb;
-  color: #b71c1c;
-}
-
-.badge-warning {
-  background: #fff4e5;
-  border-color: #ffe0b2;
-  color: #e65100;
-}
-
-.badge-info {
-  background: #e8f4fd;
-  border-color: #b3e5fc;
-  color: #01579b;
-}
-
-/* Groups */
+/* Report groups */
 .report-group {
-  border: 1px solid #eee;
-  border-radius: 10px;
   margin-bottom: 10px;
   overflow: hidden;
+
+  border: 1px solid #eee;
+  border-radius: 10px;
   background: #fff;
 }
 
 .report-group-header {
   width: 100%;
+  padding: 10px 12px;
+
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
+
   border: none;
   background: #fafafa;
   cursor: pointer;
@@ -639,11 +837,12 @@ html, body { height: 100%; }
 }
 
 .report-group-badges {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
   margin-left: auto;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .report-group-chevron {
@@ -656,7 +855,7 @@ html, body { height: 100%; }
   padding: 10px 12px;
 }
 
-/* Table */
+/* Report table */
 .report-table {
   width: 100%;
   border-collapse: collapse;
@@ -664,18 +863,21 @@ html, body { height: 100%; }
 }
 
 .report-table thead th {
-  text-align: left;
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  background: #fcfcfc;
   position: sticky;
   top: 0;
+
+  padding: 8px;
+  text-align: left;
+
+  border-bottom: 1px solid #ddd;
+  background: #fcfcfc;
 }
 
 .report-table tbody td {
   padding: 8px;
-  border-bottom: 1px solid #f0f0f0;
   vertical-align: top;
+
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .report-table tbody tr:hover {
