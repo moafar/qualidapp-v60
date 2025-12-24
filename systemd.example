@@ -1,0 +1,86 @@
+# Archivo de ejemplo para servicio systemd (opcional)
+# Este archivo es principalmente informativo, ya que QualidApp v60
+# es una aplicación estática servida por nginx y no requiere un
+# servicio propio.
+#
+# Sin embargo, si necesitas ejecutar tareas relacionadas como:
+# - Actualizaciones automáticas
+# - Sincronización periódica
+# - Monitoreo de cambios
+#
+# Puedes usar este template como base.
+
+# ==============================================================================
+# Servicio de Actualización Automática (Ejemplo)
+# ==============================================================================
+# Copiar a: /etc/systemd/system/qualidapp-update.service
+
+[Unit]
+Description=QualidApp v60 Auto-Update Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/var/www/qualidapp-v60
+ExecStart=/usr/local/bin/update-qualidapp.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
+# ==============================================================================
+# Timer para Actualización Automática
+# ==============================================================================
+# Copiar a: /etc/systemd/system/qualidapp-update.timer
+
+[Unit]
+Description=QualidApp v60 Auto-Update Timer
+Requires=qualidapp-update.service
+
+[Timer]
+# Ejecutar todos los días a las 3 AM
+OnCalendar=daily
+OnCalendar=03:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+# ==============================================================================
+# Instalación
+# ==============================================================================
+#
+# 1. Copiar archivos:
+#    sudo cp qualidapp-update.service /etc/systemd/system/
+#    sudo cp qualidapp-update.timer /etc/systemd/system/
+#
+# 2. Recargar systemd:
+#    sudo systemctl daemon-reload
+#
+# 3. Habilitar y iniciar timer:
+#    sudo systemctl enable qualidapp-update.timer
+#    sudo systemctl start qualidapp-update.timer
+#
+# 4. Verificar estado:
+#    sudo systemctl status qualidapp-update.timer
+#    sudo systemctl list-timers qualidapp-update.timer
+#
+# 5. Ejecutar manualmente:
+#    sudo systemctl start qualidapp-update.service
+#
+# 6. Ver logs:
+#    sudo journalctl -u qualidapp-update.service
+#
+
+# ==============================================================================
+# NOTA IMPORTANTE
+# ==============================================================================
+# QualidApp v60 NO REQUIERE un servicio systemd para funcionar.
+# nginx ya proporciona todo lo necesario para servir la aplicación.
+#
+# Este archivo es solo un EJEMPLO para casos de uso avanzados donde
+# quieras automatizar tareas de mantenimiento.
+#
+# Para el despliegue normal, sigue las instrucciones en DEPLOY.md

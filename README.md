@@ -57,6 +57,18 @@ npx live-server .
 
 2. Abrir en el navegador: `http://localhost:8000/`
 
+## 🚀 Despliegue en Producción
+
+Para desplegar esta aplicación en un servidor Ubuntu:
+
+- **[QUICKSTART.md](QUICKSTART.md)** - Guía rápida de despliegue en 5 minutos
+- **[DEPLOY.md](DEPLOY.md)** - Guía completa de despliegue con todas las opciones
+
+La aplicación es completamente estática (sin backend) y solo requiere:
+- Servidor web (nginx recomendado)
+- Puerto 80/443 abierto
+- No requiere base de datos ni runtime (Node.js, Python, etc.)
+
 Flujo de uso
 - Abre el editor de YAML (panel izquierdo) y pega o carga un contrato.
 - Carga `examples/sample.csv` (o `sample.xlsx`) desde la UI.

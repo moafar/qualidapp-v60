@@ -1,0 +1,102 @@
+# Configuración de nginx para QualidApp v60
+# Copiar a: /etc/nginx/sites-available/qualidapp
+# Habilitar con: sudo ln -s /etc/nginx/sites-available/qualidapp /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    listen [::]:80;
+    
+    # CAMBIAR: Reemplazar con tu dominio o dirección IP
+    server_name tu-dominio.com www.tu-dominio.com;
+    
+    # Ruta raíz de la aplicación
+    root /var/www/qualidapp-v60;
+    index index.html;
+    
+    # Logs
+    access_log /var/log/nginx/qualidapp-access.log;
+    error_log /var/log/nginx/qualidapp-error.log;
+    
+    # Configuración principal
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # Caché agresivo para archivos estáticos
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Content-Type correcto para módulos JavaScript ES
+    location ~* \.js$ {
+        add_header Content-Type "application/javascript; charset=utf-8";
+    }
+    
+    # Content-Type correcto para archivos YAML
+    location ~* \.(yaml|yml)$ {
+        add_header Content-Type "text/yaml; charset=utf-8";
+    }
+    
+    # Content-Type correcto para archivos CSV
+    location ~* \.csv$ {
+        add_header Content-Type "text/csv; charset=utf-8";
+    }
+    
+    # Deshabilitar listado de directorios
+    autoindex off;
+    
+    # Cabeceras de seguridad
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    
+    # Limitar tamaño de archivos subidos (aunque esta app no sube al servidor)
+    client_max_body_size 50M;
+    
+    # Compresión gzip
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 256;
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        application/javascript
+        application/json
+        application/x-javascript
+        text/xml
+        application/xml
+        application/xml+rss
+        text/yaml;
+}
+
+# Configuración SSL (descomentar después de obtener certificado con certbot)
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     
+#     server_name tu-dominio.com www.tu-dominio.com;
+#     
+#     # Certificados SSL (generados por certbot)
+#     ssl_certificate /etc/letsencrypt/live/tu-dominio.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/tu-dominio.com/privkey.pem;
+#     
+#     # Configuración SSL moderna
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+#     ssl_prefer_server_ciphers on;
+#     ssl_session_cache shared:SSL:10m;
+#     ssl_session_timeout 10m;
+#     
+#     # HSTS (HTTP Strict Transport Security)
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#     
+#     # Resto de la configuración (copiar del bloque HTTP de arriba)
+#     root /var/www/qualidapp-v60;
+#     index index.html;
+#     
+#     # ... (copiar locations del bloque HTTP)
+# }
