@@ -278,10 +278,12 @@ show_summary() {
     echo ""
     
     echo -e "${BLUE}📖 Próximos pasos recomendados:${NC}"
-    echo "   1. Configurar SSL con Let's Encrypt:"
-    echo "      sudo apt install certbot python3-certbot-nginx"
-    echo "      sudo certbot --nginx -d ${DOMAIN}"
-    echo ""
+    if [ "$DOMAIN" != "_" ]; then
+        echo "   1. Configurar SSL con Let's Encrypt:"
+        echo "      sudo apt install certbot python3-certbot-nginx"
+        echo "      sudo certbot --nginx -d ${DOMAIN}"
+        echo ""
+    fi
     echo "   2. Verificar estado de nginx:"
     echo "      sudo systemctl status nginx"
     echo ""

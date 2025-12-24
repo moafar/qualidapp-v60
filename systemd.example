@@ -41,8 +41,7 @@ Requires=qualidapp-update.service
 
 [Timer]
 # Ejecutar todos los días a las 3 AM
-OnCalendar=daily
-OnCalendar=03:00
+OnCalendar=*-*-* 03:00:00
 Persistent=true
 
 [Install]

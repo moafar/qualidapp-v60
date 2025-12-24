@@ -89,9 +89,11 @@ print_success "Código actualizado correctamente"
 
 # Verificar si hay cambios en las dependencias CDN
 print_info "Verificando index.html..."
-if git diff HEAD~1 HEAD -- index.html | grep -q "unpkg.com\|cdn"; then
-    print_warning "Se detectaron cambios en las dependencias CDN"
-    print_info "Considera limpiar la caché del navegador"
+if git rev-parse HEAD~1 >/dev/null 2>&1; then
+    if git diff HEAD~1 HEAD -- index.html 2>/dev/null | grep -q "unpkg.com\|cdn"; then
+        print_warning "Se detectaron cambios en las dependencias CDN"
+        print_info "Considera limpiar la caché del navegador"
+    fi
 fi
 
 # Restaurar permisos
