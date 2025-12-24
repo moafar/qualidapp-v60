@@ -18,7 +18,7 @@ Esta guía explica cómo desplegar QualidApp v60 en un servidor Ubuntu recién a
 sudo apt update && sudo apt upgrade -y
 
 # Clonar el repositorio
-cd /opt
+cd /var/www
 sudo git clone https://github.com/moafar/qualidapp-v60.git
 cd qualidapp-v60
 ```

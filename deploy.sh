@@ -119,7 +119,7 @@ setup_directory() {
     if [ ! -d "$APP_DIR" ]; then
         print_error "El directorio $APP_DIR no existe"
         print_info "Por favor, clone el repositorio primero:"
-        print_info "  cd /var/www && git clone <repo-url> qualidapp-v60"
+        print_info "  cd /var/www && git clone https://github.com/moafar/qualidapp-v60.git"
         exit 1
     fi
     
