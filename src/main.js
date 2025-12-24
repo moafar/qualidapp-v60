@@ -502,6 +502,9 @@ ui.bindValidateClick(async () => {
     // - deja counters/groups consistentes
     const finalReport = report.finalize();
 
+    // Adjuntamos filas originales para popups de detalle (no duplicamos por issue)
+    finalReport._rows = rows;
+
     // 11) Render reporte v2:
     // ValidationReportViewer convierte rowIndex->fila humana (rowIndex+1) solo en UI.
     reportViewer.render(finalReport);

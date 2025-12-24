@@ -1,5 +1,16 @@
 # Registro de versiones
 
+## [1.4.1] – 2025-12-24
+### Añadido
+- Popover de detalle por fila en el reporte de validación: el número de fila ahora abre un panel fijo con los datos completos de la fila y resalta la columna con violación.
+
+### Cambiado
+- Se adjunta una sola copia de las filas del dataset al reporte para evitar duplicación de memoria y alimentar el popover.
+- El número de fila se estiliza como enlace para invitar a la acción de apertura del popover.
+
+### Notas
+- El tooltip flotante previo se mantiene para otros usos; el popover de filas se abre por click y admite scroll interno.
+
 ## [1.4.0] – 2025-12-23
 ### Añadido
 - Nueva regla **`date-range`** para validación de rangos de fechas a nivel de contrato.

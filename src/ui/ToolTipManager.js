@@ -26,7 +26,7 @@ export class TooltipManager {
             font-size: 12px;
             pointer-events: none; /* No bloquear clicks bajo el tooltip */
             z-index: 1000;
-            max-width: 300px;
+            max-width: 520px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             line-height: 1.4;
         `;
