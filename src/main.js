@@ -38,6 +38,7 @@ import { RangeRule } from './core/rules/RangeRule.js';
 import { RegexRule } from './core/rules/RegexRule.js';
 import { RequiredRule } from './core/rules/RequiredRule.js';
 import { UniqueRule } from './core/rules/UniqueRule.js';
+import { DateRangeRule } from './core/rules/DateRangeRule.js';
 
 // --- Motor de reglas ---
 import { RuleEngine } from './core/RuleEngine.js';
@@ -82,6 +83,10 @@ engine.registerRule(new MaxMissingRateRule());
 engine.registerRule(new DomainRule());
 engine.registerRule(new RegexRule());
 engine.registerRule(new UniqueRule());
+engine.registerRule(new DateRangeRule());
+
+// tras instanciar RuleEngine y registrar reglas
+window.engine = engine;
 
 /**
  * 2) Infraestructura

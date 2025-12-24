@@ -7,7 +7,15 @@
     
     <link rel="stylesheet" href="style.css">
     
-    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <!-- Librerías globales necesarias: js-yaml (parser YAML) y dayjs (parseo de fechas) -->
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="https://unpkg.com/dayjs@1.11.8/dayjs.min.js"></script>
+    <script src="https://unpkg.com/dayjs@1.11.8/plugin/customParseFormat.js"></script>
+    <script>
+      if (window.dayjs && typeof dayjs_plugin_customParseFormat !== 'undefined') {
+        dayjs.extend(dayjs_plugin_customParseFormat);
+      }
+    </script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>

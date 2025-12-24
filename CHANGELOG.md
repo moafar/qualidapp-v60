@@ -1,5 +1,36 @@
 # Registro de versiones
 
+## [1.4.0] – 2025-12-23
+### Añadido
+- Nueva regla **`date-range`** para validación de rangos de fechas a nivel de contrato.
+  - Soporta fechas en formato **`DD/MM/YYYY`**.
+  - Acepta valores con hora adjunta (la hora se ignora durante la validación).
+  - Validación inclusiva (`min ≤ fecha ≤ max`).
+  - Parámetros configurables desde el contrato YAML: `min`, `max`, `format`, `severity`.
+- Integración completa de `date-range` en el flujo de validación:
+  - Ejecución fila a fila a través de `RuleEngine`.
+  - Generación de violaciones por fila con `rowIndex`, valor observado y mensaje descriptivo.
+  - Resolución de severidad final (`soft` / `hard`) mediante `SeverityPolicy`.
+
+### Cambiado
+- Normalización de fechas en `ExcelDatasetLoader`:
+  - Las celdas de fecha provenientes de Excel ahora se convierten por defecto a **`DD/MM/YYYY`**.
+  - Se mantiene el uso de `cellDates: true` para evitar números seriales de Excel.
+- Alineación explícita entre el formato de fechas producido por el loader y el parseo estricto usado en `DateRangeRule` (`dayjs` + `customParseFormat`).
+
+### Notas de compatibilidad / Breaking change
+- Cambio en el formato por defecto de fechas cargadas desde Excel:
+  - **Antes:** `YYYY-MM-DDTHH:mm:ssZ` (ISO).
+  - **Ahora:** `DD/MM/YYYY`.
+- Contratos, reglas o consumidores que asumían formato ISO deben ajustarse para reflejar el nuevo formato o redefinir su lógica de validación.
+
+### Documentación
+- Ejemplo de uso de la regla `date-range` documentado en contratos YAML.
+- Comentarios y JSDoc actualizados en:
+  - `src/core/rules/DateRangeRule.js`
+  - `src/infrastructure/ExcelDatasetLoader.js`
+  
+
 ## [1.3.1] - 2025-12-22
 ### Añadido
 - Persistencia de ediciones de reglas desde el editor JSON inline en la UI del contrato.
