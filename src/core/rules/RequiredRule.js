@@ -8,10 +8,7 @@ export class RequiredRule {
     // --- METADATOS PARA EL CATÁLOGO ---
     static description = 'Asegura que una columna no contenga valores nulos, indefinidos o cadenas de texto vacías.';
     static parameters = {
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: soft.' 
-        }
+        // No requiere parámetros adicionales
     };
     // ---------------------------------
 

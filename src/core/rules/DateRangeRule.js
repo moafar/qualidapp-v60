@@ -5,8 +5,7 @@ export class DateRangeRule {
     static parameters = {
         min: { type: 'string|Date', description: 'Fecha mínima inclusiva (DD/MM/YYYY).' },
         max: { type: 'string|Date', description: 'Fecha máxima inclusiva (DD/MM/YYYY).' },
-        format: { type: 'string', description: 'Formato dayjs. Default: DD/MM/YYYY.' },
-        severity: { type: 'string', description: 'Criticidad (soft, hard). Default: soft.' }
+        format: { type: 'string', description: 'Formato dayjs. Default: DD/MM/YYYY.' }
     };
 
     get id() { return 'date-range'; }

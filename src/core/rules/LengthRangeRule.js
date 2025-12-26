@@ -14,10 +14,6 @@ export class LengthRangeRule {
         max: { 
             type: 'number', 
             description: 'Longitud máxima permitida (inclusivo).' 
-        },
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: soft.' 
         }
     };
     // ---------------------------------

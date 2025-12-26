@@ -10,6 +10,7 @@ export class SeverityPolicy {
    * @param {object} contract - contrato completo
    * @returns {'error'|'warning'|'info'}
    */
+
   resolve(issue, contract) {
     if (!issue || !issue.type) return 'error';
 
@@ -54,6 +55,6 @@ export class SeverityPolicy {
 
     if (crit === 'high') return 'error';
     if (crit === 'medium') return 'warning';
-    return 'warning';
+    return 'info';
   }
 }

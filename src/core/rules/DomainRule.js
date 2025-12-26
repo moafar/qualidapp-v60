@@ -14,10 +14,6 @@ export class DomainRule {
         case_sensitive: {
             type: 'boolean',
             description: 'Indica si la comparación debe distinguir entre mayúsculas y minúsculas (default: false).'
-        },
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: soft.'
         }
     };
     // ---------------------------------

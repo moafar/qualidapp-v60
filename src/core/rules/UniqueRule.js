@@ -7,10 +7,8 @@ export class UniqueRule {
     // --- METADATOS PARA EL CATÁLOGO ---
     static description = 'Garantiza que todos los valores en la columna son distintos. Se usa para claves primarias o identificadores.';
     static parameters = {
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: hard.' // Unicidad suele ser crítica
-        }
+
+        // No requiere parámetros adicionales
     };
     // ---------------------------------
 

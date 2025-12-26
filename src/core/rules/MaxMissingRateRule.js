@@ -10,10 +10,6 @@ export class MaxMissingRateRule {
         rate: { 
             type: 'number', 
             description: 'Tasa máxima de valores nulos permitida (ej: 0.05 para 5%).' 
-        },
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: hard.' 
         }
     };
     // ---------------------------------

@@ -15,10 +15,6 @@ export class RangeRule {
         max: { 
             type: 'number', 
             description: 'Valor máximo permitido (inclusivo).' 
-        },
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: soft.' 
         }
     };
     // ---------------------------------

@@ -10,10 +10,6 @@ export class RegexRule {
         pattern: { 
             type: 'string', 
             description: 'La expresión regular que el valor debe coincidir. Debe ser una expresión válida sin las barras delimitadoras.' 
-        },
-        severity: { 
-            type: 'string', 
-            description: 'Define la criticidad de la violación (soft, hard). Default: soft.'
         }
     };
     // ---------------------------------
