@@ -23,7 +23,7 @@
     <header>
         <div class="brand-area">
             <h1>Contract Manager</h1>
-            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v1.4.2</span>
+            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v1.5.0</span>
         </div>
 
         <div class="tabs header-tabs">
@@ -31,6 +31,7 @@
             <div class="tab" data-target="tab-tree">Árbol</div>
             <div class="tab" data-target="tab-columns">Columns</div>
             <div class="tab" data-target="tab-catalog">Rule catalog</div>
+            <div class="tab" data-target="tab-dataset">Dataset</div>
             <div class="tab" data-target="tab-validation">Validación</div>
         </div>
 
@@ -86,13 +87,24 @@
                         <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el detalle de columnas]</div>
                     </div>    
                 </div>
+                <div id="tab-dataset" class="tab-pane hidden">
+                    <div class="toolbar dataset-upload" style="gap:14px;">
+                        <strong>Dataset:</strong>
+                        <input type="file" id="fileInput" accept=".xlsx, .csv">
+                        <span id="datasetFileLabel" class="dataset-file-label">Ningún archivo seleccionado.</span>
+                        <button id="btnValidateDataset" class="btn-header btn-primary" disabled>Validar</button>
+                    </div>
+                    <div class="dataset-upload-hint">Selecciona el dataset aquí. Estos datos se usarán al validar.</div>
+                    <div id="datasetSummaryRoot" class="dataset-summary-empty">[Debe cargarse un dataset para ver su resumen estadístico]</div>
+                </div>
                 <div id="tab-catalog" class="tab-pane hidden">
                     <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el Catálogo de Reglas]</div>
                 </div>
                 <div id="tab-validation" class="tab-pane hidden">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <strong>Dataset:</strong>
-                        <input type="file" id="fileInput" accept=".xlsx, .csv">
+                    <div id="validationContext" class="validation-context">
+                        <div class="validation-context-empty">Carga un dataset y ejecuta la validación para ver el contexto.</div>
+                    </div>
+                    <div class="validation-actions">
                         <button id="btnValidate" class="btn-header btn-primary" disabled>Validar</button>
                     </div>
 

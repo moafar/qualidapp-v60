@@ -7,14 +7,24 @@ export class UIManager {
         this.yamlInput = document.getElementById('yamlInput');
         this.fileInput = document.getElementById('fileInput');
         this.btnValidate = document.getElementById('btnValidate');
+        this.btnValidateDataset = document.getElementById('btnValidateDataset');
+        this.validateButtons = [this.btnValidate, this.btnValidateDataset].filter(Boolean);
         this.outputElement = document.getElementById('output');
+        this.datasetFileLabel = document.getElementById('datasetFileLabel');
+        this.validationContext = document.getElementById('validationContext');
 
         // Habilitar el botón solo si hay archivo seleccionado
         if (this.fileInput) {
             this.fileInput.addEventListener('change', () => {
-                this.btnValidate.disabled = !this.fileInput.files.length;
+                this.setValidateEnabled(Boolean(this.fileInput.files.length));
+                this.setDatasetFileName(this.fileInput.files[0]?.name || null);
+                this.updateValidationContext(null);
             });
         }
+
+        this.setDatasetFileName(null);
+        this.updateValidationContext(null);
+        this.setValidateEnabled(false);
     }
 
     getContractText() {
@@ -26,9 +36,9 @@ export class UIManager {
     }
 
     bindValidateClick(callback) {
-        if (this.btnValidate) {
-            this.btnValidate.addEventListener('click', () => callback());
-        }
+        this.validateButtons.forEach((btn) => {
+            btn.addEventListener('click', () => callback());
+        });
     }
 
     /**
@@ -87,5 +97,72 @@ export class UIManager {
 
     showError(message) {
         this.outputElement.innerHTML = `<div style="color:red; font-weight:bold">⚠️ Error del Sistema: ${message}</div>`;
+    }
+
+    setDatasetFileName(name) {
+        if (!this.datasetFileLabel) return;
+        this.datasetFileLabel.textContent = name
+            ? `Seleccionado: ${name}`
+            : 'Ningún archivo seleccionado.';
+    }
+
+    updateValidationContext(context) {
+        if (!this.validationContext) return;
+        if (!context) {
+            this.validationContext.innerHTML = '<div class="validation-context-empty">Carga un dataset y ejecuta la validación para ver el contexto.</div>';
+            return;
+        }
+
+        const cards = [
+            {
+                label: 'Archivo dataset',
+                value: context.datasetFileName || '—',
+                hint: 'Fuente cargada',
+            },
+            {
+                label: 'Filas procesadas',
+                value: this._formatNumber(context.datasetRows),
+                hint: 'Registros leídos',
+            },
+            {
+                label: 'Columnas detectadas',
+                value: this._formatNumber(context.datasetColumns),
+                hint: 'Según dataset',
+            },
+            {
+                label: 'Contrato',
+                value: context.contractLabel || '—',
+                hint: context.contractVersion ? `Versión ${context.contractVersion}` : 'Sin versión',
+            },
+        ];
+
+        const cardsHtml = cards
+            .map(
+                (card) => `
+                <div class="validation-context-card">
+                    <span>${card.label}</span>
+                    <strong>${card.value}</strong>
+                    <span>${card.hint}</span>
+                </div>`
+            )
+            .join('');
+
+        this.validationContext.innerHTML = `
+            <div class="validation-context-cards">${cardsHtml}</div>
+        `;
+    }
+
+    setValidateEnabled(enabled) {
+        this.validateButtons.forEach((btn) => {
+            btn.disabled = !enabled;
+        });
+    }
+
+    _formatNumber(value) {
+        if (value === null || value === undefined || Number.isNaN(value)) return '—';
+        const num = Number(value);
+        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+        return String(num);
     }
 }

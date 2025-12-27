@@ -63,6 +63,8 @@ import { SchemaValidator } from './core/schema/SchemaValidator.js';
 import { SeverityPolicy } from './core/report/SeverityPolicy.js';
 import { ReportBuilder } from './core/report/ReportBuilder.js';
 import { ValidationReportViewer } from './ui/report/ValidationReportViewer.js';
+import { DatasetProfiler } from './core/report/DatasetProfiler.js';
+import { DatasetSummaryViewer } from './ui/DatasetSummaryViewer.js';
 
 
 // ============================================================
@@ -95,6 +97,7 @@ window.engine = engine;
  */
 const parser = new YamlContractParser();
 const loader = new ExcelDatasetLoader();
+const datasetProfiler = new DatasetProfiler();
 
 /**
  * 3) UI
@@ -107,10 +110,15 @@ const ui = new UIManager();
 const viewer = new ContractViewer();
 const treeViewer = new ContractTreeViewer('tab-tree');
 const catalogViewer = new RuleCatalogViewer('tab-catalog', engine);
+const datasetSummaryViewer = new DatasetSummaryViewer('datasetSummaryRoot');
+datasetSummaryViewer.reset();
 
-/**
- * 4) Utilidades
- */
+if (ui.fileInput) {
+  ui.fileInput.addEventListener('change', () => {
+    handleDatasetSelection();
+  });
+}
+
 const tooltipManager = new TooltipManager(); // (si tu UI lo usa; aquí no se invoca directamente)
 const downloader = new FileDownloader();
 
@@ -143,6 +151,10 @@ const reportViewer = new ValidationReportViewer('reportContainer');
  * - Es la fuente de verdad "en memoria" cuando editas con ContractViewer.
  */
 let currentContractObj = null;
+let currentDatasetProfile = null;
+let currentDatasetRows = null;
+let currentDatasetMeta = null;
+let datasetLoadToken = 0;
 
 
 // ============================================================
@@ -221,6 +233,79 @@ function buildColumnsData(rows) {
   });
 
   return { columnsData, datasetColumns: Array.from(datasetColumnsSet) };
+}
+
+function getSafeContract() {
+  if (currentContractObj) return currentContractObj;
+  try {
+    return parser.parse(yamlInput.value);
+  } catch (err) {
+    console.warn('[Contract] YAML inválido al intentar obtener contrato para dataset', err);
+    return null;
+  }
+}
+
+function isSameDatasetFile(meta, file) {
+  if (!meta || !file) return false;
+  return meta.name === file.name && meta.lastModified === file.lastModified;
+}
+
+async function handleDatasetSelection() {
+  const requestId = ++datasetLoadToken;
+  const file = ui.getDatasetFile();
+  currentDatasetRows = null;
+  currentDatasetMeta = null;
+  currentDatasetProfile = null;
+
+  if (!file) {
+    datasetSummaryViewer.reset();
+    ui.updateValidationContext(null);
+    ui.setValidateEnabled(false);
+    return;
+  }
+
+  datasetSummaryViewer.showLoading();
+
+  try {
+    const rows = await loader.load(file);
+    const { columnsData, datasetColumns } = buildColumnsData(rows);
+    if (requestId !== datasetLoadToken) return;
+    // Columnas declaradas por contrato (si existe)
+    const contract = getSafeContract();
+    const contractCols = Array.isArray(contract?.columns) ? contract.columns : [];
+
+    currentDatasetProfile = datasetProfiler.profile({
+      rows,
+      columnsData,
+      datasetColumns,
+      contractColumns: contractCols,
+    });
+
+    currentDatasetRows = rows;
+    currentDatasetMeta = {
+      name: file.name,
+      lastModified: file.lastModified,
+      columnsData,
+      datasetColumns,
+    };
+
+    datasetSummaryViewer.render(currentDatasetProfile);
+
+    ui.updateValidationContext({
+      datasetFileName: file.name,
+      datasetRows: rows.length,
+      datasetColumns: datasetColumns.length,
+      contractLabel: contract?.dataset?.title || contract?.dataset?.id || contract?.id || '—',
+      contractVersion: contract?.contract_version || null,
+    });
+    ui.setValidateEnabled(true);
+  } catch (err) {
+    if (requestId !== datasetLoadToken) return;
+    console.error('[Dataset Preview] Error al procesar dataset', err);
+    datasetSummaryViewer.showError(err.message || 'No se pudo generar el resumen del dataset.');
+    ui.updateValidationContext(null);
+    ui.setValidateEnabled(false);
+  }
 }
 
 
@@ -389,6 +474,7 @@ ui.bindValidateClick(async () => {
   try {
     // 0) UX: mostrar “cargando…”
     ui.showLoading();
+    datasetSummaryViewer.showLoading();
 
     // 1) Contrato: fuente de verdad
     // - si existe en memoria (por edición UI), úsalo
@@ -400,9 +486,28 @@ ui.bindValidateClick(async () => {
     const file = ui.getDatasetFile();
     if (!file) throw new Error("Falta archivo de datos.");
 
-    // 3) Cargar dataset -> rows[]
-    // rows: [{colA:..., colB:...}, ...]
-    const rows = await loader.load(file);
+    // 3) Dataset cargado (reutiliza preview si coincide)
+    let rows = null;
+    let columnsData = null;
+    let datasetColumns = null;
+
+    if (isSameDatasetFile(currentDatasetMeta, file) && currentDatasetRows && currentDatasetMeta?.columnsData && currentDatasetMeta?.datasetColumns) {
+      rows = currentDatasetRows;
+      columnsData = currentDatasetMeta.columnsData;
+      datasetColumns = currentDatasetMeta.datasetColumns;
+    } else {
+      rows = await loader.load(file);
+      const normalized = buildColumnsData(rows);
+      columnsData = normalized.columnsData;
+      datasetColumns = normalized.datasetColumns;
+      currentDatasetRows = rows;
+      currentDatasetMeta = {
+        name: file.name,
+        lastModified: file.lastModified,
+        columnsData,
+        datasetColumns,
+      };
+    }
 
     // 4) Inicializar ReportBuilder (reporte v2)
     // Importante: "report" es el builder, NO el reporte final
@@ -420,13 +525,31 @@ ui.bindValidateClick(async () => {
       }
     );
 
-    // 5) Normalización: rows[] -> columnsData{} + datasetColumns[]
-    const { columnsData, datasetColumns } = buildColumnsData(rows);
+    ui.updateValidationContext({
+      datasetFileName: file.name,
+      datasetRows: rows.length,
+      datasetColumns: datasetColumns.length,
+      contractLabel: contract?.dataset?.title || contract?.dataset?.id || contract?.id || '—',
+      contractVersion: contract?.contract_version || null
+    });
 
     // 6) Columnas declaradas por contrato
     // contractCols: lista de objetos {name, rules, criticality, ...}
     const contractCols = Array.isArray(contract?.columns) ? contract.columns : [];
     const contractColNames = contractCols.map(c => c?.name).filter(Boolean);
+
+    try {
+      currentDatasetProfile = datasetProfiler.profile({
+        rows,
+        columnsData,
+        datasetColumns,
+        contractColumns: contractCols,
+      });
+      datasetSummaryViewer.render(currentDatasetProfile);
+    } catch (profileErr) {
+      console.error('[DatasetProfiler] Error al crear el resumen', profileErr);
+      datasetSummaryViewer.showError(profileErr.message || 'No se pudo generar el resumen del dataset.');
+    }
 
     // 7) Completar metadata del dataset dentro del builder
     // Nota: mientras NO implementes setDatasetInfo(), tocamos el interno _report.

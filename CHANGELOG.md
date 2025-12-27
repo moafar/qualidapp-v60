@@ -1,5 +1,25 @@
 # Registro de versiones
 
+## [1.5.0] – 2025-12-27
+### Añadido
+- Sección de descripción estadística del dataset cargado: tarjetas de resumen (# filas, # columnas, extras y faltantes, nulos) y detalles por columna (tipo detectado, cobertura, nulos y unicidad), además de un set de tarjetas de resumen (total, nulos unicos, min, max, etc) y un histograsna/diagrama de barras
+
+### Cambiado
+- Se agrega la pestña 'Dataset' 
+
+### Notas
+- Han crecido ahora dos secciones que deberán reorganizarse en el futuro agrupando las funcionalidades actuales: una sección de 'Contrato' y otra de 'Dataset'.
+
+## [1.4.2] – 2025-12-25
+### Añadido
+- Refactoring de archivos de rules: eliminado severity de la sección 'parameters', no utilizado.
+
+### Cambiado
+No hay cambios.
+
+### Notas
+La sección Severity estaba pensada para definir severidad de violaciones, pero se determiinó que puede definirse con el parámetro 'criticality' en la declaración de reglas de cada columna.
+
 ## [1.4.1] – 2025-12-24
 ### Añadido
 - Popover de detalle por fila en el reporte de validación: el número de fila ahora abre un panel fijo con los datos completos de la fila y resalta la columna con violación.

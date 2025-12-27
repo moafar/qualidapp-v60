@@ -31,6 +31,7 @@ Características principales
 - Propósito: validar hojas de datos contra contratos YAML compuestos por reglas reutilizables.
 - Entrada: ficheros Excel (.xlsx) o CSV y contratos en YAML.
 - Salida: lista de violaciones por fila/columna mostrada en la UI.
+- Resumen Dataset: pestaña dedicada que perfila el dataset cargado (tarjetas con KPIs, tabla filtrable y distribuciones tipo histograma por columna).
 
 Estructura del proyecto
 - `index.html`: punto de entrada estático.
