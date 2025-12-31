@@ -155,7 +155,7 @@ export class DatasetSummaryViewer {
             ${this._options(
               [
                 ['name', 'Nombre'],
-                ['nulls', '% Nulos'],
+                ['nulls', 'Nulos'],
                 ['coverage', 'Cobertura'],
                 ['distinct', 'Unicidad'],
                 ['criticality', 'Criticidad'],
@@ -190,7 +190,7 @@ export class DatasetSummaryViewer {
               <th style="width:12%">Estado</th>
               <th style="width:20%">Tipos</th>
               <th style="width:15%">Cobertura</th>
-              <th style="width:15%">% Nulos</th>
+              <th style="width:15%">Nulos</th>
               <th style="width:10%">Unicidad</th>
             </tr>
           </thead>
@@ -234,7 +234,7 @@ export class DatasetSummaryViewer {
           ${typeBadge}
         </td>
         <td>${this._progressBar(coverage)}</td>
-        <td>${this._progressBar(1 - nullPct, '', true)}</td>
+        <td>${this._progressBar(nullPct, '', true)}</td>
         <td>${this._progressBar(uniqueness)}</td>
       </tr>
     `;
@@ -256,7 +256,7 @@ export class DatasetSummaryViewer {
     const details = [
       ['Valores totales', this._formatCompact(stats.totalValues || 0)],
       ['Valores no nulos', this._formatCompact(stats.filledCount || 0)],
-      ['% Nulos', this._formatPct(stats.nullPct || 0)],
+      ['Nulos', this._formatPct(stats.nullPct || 0)],
       ['Valores únicos', stats.distinctIsCapped ? `${stats.distinctCount}+` : this._formatCompact(stats.distinctCount || 0)],
       ['Ejemplos', (stats.examples || []).join(', ') || '—'],
     ];

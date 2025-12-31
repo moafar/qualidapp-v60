@@ -405,14 +405,13 @@ export class ContractViewer {
         if (e.target.dataset.action === 'show-catalog') {
             const ruleId = e.target.dataset.ruleId;
             
-            // 1. Encontrar y simular el clic en la pestaña "Rule catalog"
-            const catalogTab = document.querySelector('.header-tabs .tab[data-target="tab-catalog"]');
-            if (catalogTab) {
-                 catalogTab.click(); // Activa la pestaña (reutilizando _initTabs)
-                 
-                 // Opcional: Desplazarse o resaltar la regla dentro del catálogo
-                 // console.log(`Navegando al catálogo para ver la regla: ${ruleId}`);
-            }
+            // 1. Garantizar que la sección Contrato esté activa
+            const contractPrimaryTab = document.querySelector('.primary-tabs .tab[data-target="section-contract"]');
+            contractPrimaryTab?.click();
+
+            // 2. Activar la pestaña del catálogo dentro de Contrato
+            const catalogTab = document.querySelector('.tabs[data-scope="contract"] .tab[data-target="tab-catalog"]');
+            catalogTab?.click();
             // Asegurarse de que el tooltip se oculte inmediatamente
             document.getElementById('dynamic-tooltip').style.display = 'none'; 
         }
@@ -423,30 +422,36 @@ export class ContractViewer {
     // ------------------------------------
 
     _initTabs() {
-        // Este selector funciona para las pestañas en el header y los contenedores
-        const tabs = document.querySelectorAll('.tab');
-        const contentPanes = document.querySelectorAll('.tab-pane');
+        const tabsContainer = document.querySelector('.tabs[data-scope="contract"]');
+        if (!tabsContainer) return;
+
+        const tabs = tabsContainer.querySelectorAll('.tab');
+        const contentPanes = document.querySelectorAll('.tab-pane[data-scope="contract"]');
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 const targetId = tab.dataset.target;
-                
-                // 1. Alternar UI Activa (Botones)
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelector(`[data-target="${targetId}"]`).classList.add('active');
-                
-                // 2. Mostrar Contenido
-                contentPanes.forEach(p => p.classList.add('hidden'));
-                document.getElementById(targetId).classList.remove('hidden');
 
-                // 3. Mostrar/Ocultar toolbar (Solo visible para la pestaña 'Columns')
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                contentPanes.forEach(p => {
+                    if (p.id === targetId) {
+                        p.classList.remove('hidden');
+                    } else {
+                        p.classList.add('hidden');
+                    }
+                });
+
                 const toolbar = document.getElementById('filterToolbar');
-                if(toolbar) toolbar.style.display = (targetId === 'tab-columns') ? 'flex' : 'none';
+                if (toolbar) toolbar.style.display = (targetId === 'tab-columns') ? 'flex' : 'none';
             });
         });
-        
-        // Inicializar la primera pestaña activa
-        document.getElementById('tab-overview').classList.remove('hidden');
+
+        const activeTab = tabsContainer.querySelector('.tab.active') || tabs[0];
+        if (activeTab) {
+            activeTab.dispatchEvent(new Event('click'));
+        }
     }
 
     _initFilters() {

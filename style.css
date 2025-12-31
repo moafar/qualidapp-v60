@@ -143,6 +143,51 @@ header {
   border-bottom: 1px solid var(--border-color);
 }
 
+/* --- 2.b) PRIMARY LAYOUT SECTIONS --------------------------------------- */
+.primary-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.section-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: #fdfdfd;
+}
+
+.section-actions .action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.section-pane .tab-content {
+  min-height: 320px;
+}
+
 /* Brand area (left) */
 .brand-area {
   min-width: 200px;
@@ -334,6 +379,10 @@ textarea:focus {
   background: #fff;
 }
 
+#tab-yaml textarea {
+  min-height: 400px;
+}
+
 /* --- 6) VIEWER: TOOLBAR + TABS CONTENT ----------------------------------- */
 .toolbar {
   padding: 8px 20px;
@@ -379,6 +428,39 @@ textarea:focus {
 
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.yaml-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dataset-preview-empty {
+  padding: 20px;
+  border: 1px dashed var(--border-color);
+  border-radius: 10px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.dataset-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.dataset-preview-table thead th {
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px;
+  color: var(--text-muted);
+}
+
+.dataset-preview-table tbody td {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 /* --- 7) TABLES ------------------------------------------------------------ */
@@ -1451,4 +1533,37 @@ tr:last-child td {
 
 .validation-actions {
   margin-bottom: 16px;
+}
+
+.sub-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.sub-tabs .tab {
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px 8px 0 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.sub-tabs .tab:hover {
+  color: var(--accent-color);
+  background: var(--bg-secondary);
+}
+
+.sub-tabs .tab.active {
+  border-color: var(--border-color);
+  border-bottom-color: var(--bg-card);
+  background: #fff;
+  color: var(--accent-color);
 }

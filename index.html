@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Manager (SOLID)</title>
+    <title>QualidApp V60</title>
     
     <link rel="stylesheet" href="style.css">
     
@@ -22,49 +22,48 @@
 
     <header>
         <div class="brand-area">
-            <h1>Contract Manager</h1>
-            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v1.5.0</span>
+            <h1>QualidApp V60</h1>
+            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v2.0.1</span>
         </div>
 
-        <div class="tabs header-tabs">
-            <div class="tab active" data-target="tab-overview">Resumen</div>
-            <div class="tab" data-target="tab-tree">Árbol</div>
-            <div class="tab" data-target="tab-columns">Columns</div>
-            <div class="tab" data-target="tab-catalog">Rule catalog</div>
-            <div class="tab" data-target="tab-dataset">Dataset</div>
-            <div class="tab" data-target="tab-validation">Validación</div>
+        <div class="tabs header-tabs primary-tabs">
+            <div class="tab active" data-target="section-contract">Contrato</div>
+            <div class="tab" data-target="section-dataset">Dataset</div>
         </div>
 
-        <div class="header-actions">
-            <input type="file" id="yamlFileInput" accept=".yaml,.yml" style="display:none;">
-            <button id="btnLoadYaml" class="btn-header icon-btn">📂 Cargar</button>
-            
-            <div class="v-separator"></div>
-
-            <button id="btnEdit" class="btn-header icon-btn">✏️ Editar</button>
-            <button id="btnSave" class="btn-header btn-primary icon-btn hidden">💾 Guardar</button>
-            <button id="btnCancel" class="btn-header icon-btn hidden" style="color:#b91c1c; border-color:#fecaca; background:#fef2f2;">❌ Cancelar</button>
-        </div>
+        <div class="header-actions"></div>
     </header>
 
-    <div class="wrap" id="mainLayout">
-        
-        <div class="pane">
-            <textarea id="yamlInput" placeholder="Pega tu contrato YAML aquí..."></textarea>
-        </div>
+    <main id="appSections" class="primary-content">
+        <section id="section-contract" class="section-pane">
+            <div class="section-actions">
+                <div class="action-group">
+                    <input type="file" id="yamlFileInput" accept=".yaml,.yml" style="display:none;">
+                    <button id="btnLoadYaml" class="btn-header icon-btn">📂 Importar Contrato</button>
+                </div>
+                <div class="action-group">
+                    <button id="btnEdit" class="btn-header icon-btn">✏️ Editar contrato</button>
+                    <button id="btnSave" class="btn-header btn-primary icon-btn hidden">💾 Guardar</button>
+                    <button id="btnCancel" class="btn-header icon-btn hidden" style="color:#b91c1c; border-color:#fecaca; background:#fef2f2;">❌ Cancelar</button>
+                </div>
+            </div>
 
-        <div class="gutter" id="resizeGutter"></div>
+            <div class="tabs sub-tabs" data-scope="contract">
+                <div class="tab active" data-target="tab-overview">Resumen</div>
+                <div class="tab" data-target="tab-tree">Árbol</div>
+                <div class="tab" data-target="tab-columns">Columnas</div>
+                <div class="tab" data-target="tab-catalog">Reglas</div>
+                <div class="tab" data-target="tab-yaml">YAML</div>
+            </div>
 
-        <div class="pane" id="viewerPane">
-            <!-- toolbar movida dentro de #tab-columns; duplicado eliminado -->
             <div class="tab-content">
-                <div id="tab-overview" class="tab-pane active">
+                <div id="tab-overview" class="tab-pane active" data-scope="contract">
                     <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver su resumen]</div>
                 </div>
-                <div id="tab-tree" class="tab-pane hidden">
+                <div id="tab-tree" class="tab-pane hidden" data-scope="contract">
                     <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el Árbol]</div>
                 </div>
-                <div id="tab-columns" class="tab-pane hidden">
+                <div id="tab-columns" class="tab-pane hidden" data-scope="contract">
                     <div class="toolbar" id="filterToolbar">
                         <input type="text" id="searchFilter" placeholder="Buscar columna..." style="width: 200px;">
                         <select id="critFilter">
@@ -87,20 +86,42 @@
                         <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el detalle de columnas]</div>
                     </div>    
                 </div>
-                <div id="tab-dataset" class="tab-pane hidden">
-                    <div class="toolbar dataset-upload" style="gap:14px;">
-                        <strong>Dataset:</strong>
-                        <input type="file" id="fileInput" accept=".xlsx, .csv">
-                        <span id="datasetFileLabel" class="dataset-file-label">Ningún archivo seleccionado.</span>
-                        <button id="btnValidateDataset" class="btn-header btn-primary" disabled>Validar</button>
-                    </div>
-                    <div class="dataset-upload-hint">Selecciona el dataset aquí. Estos datos se usarán al validar.</div>
-                    <div id="datasetSummaryRoot" class="dataset-summary-empty">[Debe cargarse un dataset para ver su resumen estadístico]</div>
-                </div>
-                <div id="tab-catalog" class="tab-pane hidden">
+                <div id="tab-catalog" class="tab-pane hidden" data-scope="contract">
                     <div style="color:var(--text-muted); padding:20px;">[Debe cargarse un contrato para ver el Catálogo de Reglas]</div>
                 </div>
-                <div id="tab-validation" class="tab-pane hidden">
+                <div id="tab-yaml" class="tab-pane hidden" data-scope="contract">
+                    <textarea id="yamlInput" placeholder="Pega tu contrato YAML aquí..."></textarea>
+                    <div class="yaml-hint">Los cambios se reflejan automáticamente en las demás pestañas.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-dataset" class="section-pane hidden">
+            <div class="section-actions">
+                <div class="action-group">
+                    <input type="file" id="fileInput" accept=".xlsx, .csv" style="display:none;">
+                    <button id="btnSelectDataset" class="btn-header icon-btn">📁 Seleccionar dataset</button>
+                    <span id="datasetFileLabel" class="dataset-file-label">Ningún archivo seleccionado.</span>
+                </div>
+                <div class="action-group">
+                    <button id="btnValidateDataset" class="btn-header btn-primary" disabled>Ejecutar validación</button>
+                </div>
+            </div>
+
+            <div class="tabs sub-tabs" data-scope="dataset">
+                <div class="tab active" data-target="tab-dataset-preview">Vista previa</div>
+                <div class="tab" data-target="tab-dataset-profile">Perfil</div>
+                <div class="tab" data-target="tab-validation">Validación</div>
+            </div>
+
+            <div class="tab-content">
+                <div id="tab-dataset-preview" class="tab-pane active" data-scope="dataset">
+                    <div id="datasetPreviewRoot" class="dataset-preview-empty">Carga un dataset para explorar las primeras filas.</div>
+                </div>
+                <div id="tab-dataset-profile" class="tab-pane hidden" data-scope="dataset">
+                    <div id="datasetSummaryRoot" class="dataset-summary-empty">[Debe cargarse un dataset para ver su resumen estadístico]</div>
+                </div>
+                <div id="tab-validation" class="tab-pane hidden" data-scope="dataset">
                     <div id="validationContext" class="validation-context">
                         <div class="validation-context-empty">Carga un dataset y ejecuta la validación para ver el contexto.</div>
                     </div>
@@ -113,10 +134,9 @@
                     <!-- Nuevo reporte v2 -->
                     <div id="reportContainer"></div>
                 </div>
-
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
     <script type="module" src="./src/main.js"></script>
 
 </body>

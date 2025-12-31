@@ -1,5 +1,24 @@
 # Registro de versiones
 
+## [2.0.1] – 2025-12-31
+### Arreglado
+- Corregido el cálculo de la barra de progreso para '% Nulos' en el resumen del dataset: ahora muestra correctamente el porcentaje de valores nulos en lugar del porcentaje de no nulos, asegurando que sea complementario al 100% con la columna 'Cobertura'.
+- Corregidos errores de redacción (pie de yaml en vista YAML del contrato ahora dice "automáticamente")
+
+## [2.0.0] – 2025-12-27
+### Añadido
+- Nueva vista “Vista previa” para datasets: muestra las primeras filas en formato tabular con limitación configurable (20 filas, 10 columnas) y estados de carga/error dedicados.
+- Botón “Seleccionar dataset” integrado a la sección Dataset para abrir el picker estándar sin depender del input expuesto.
+
+### Cambiado
+- La UI ahora se organiza en dos secciones principales: “Contrato” y “Dataset”, cada una con sus propias subpestañas (Resumen, Árbol, Columnas, Reglas, YAML / Vista previa, Perfil, Validación) y barra de acciones contextual.
+- El editor YAML se mueve a una pestaña específica dentro de “Contrato”, manteniendo acceso con un clic pero evitando mezclarlo con vistas del dataset.
+- Los botones heredados “Cargar” y “Editar” se renombraron a “Importar YAML” y “Editar contrato” y conviven con guardar/cancelar en la barra del contrato.
+- La carga de dataset genera simultáneamente la vista previa y el perfil estadístico; ambos se actualizan cuando cambia el archivo o ocurre un error.
+
+### Notas
+- El layout ya no usa el resizer lateral legado; la nueva estructura se basa en tarjetas y paneles independientes.
+
 ## [1.5.0] – 2025-12-27
 ### Añadido
 - Sección de descripción estadística del dataset cargado: tarjetas de resumen (# filas, # columnas, extras y faltantes, nulos) y detalles por columna (tipo detectado, cobertura, nulos y unicidad), además de un set de tarjetas de resumen (total, nulos unicos, min, max, etc) y un histograsna/diagrama de barras

@@ -52,7 +52,7 @@ import { UIManager } from './ui/UIManager.js';
 import { ContractViewer } from './ui/ContractViewer.js';
 import { ContractTreeViewer } from './ui/ContractTreeViewer.js';
 import { RuleCatalogViewer } from './ui/RuleCatalogViewer.js';
-import { LayoutResizer } from './ui/LayoutResizer.js';
+import { DatasetPreviewViewer } from './ui/DatasetPreviewViewer.js';
 
 // --- Utilidades ---
 import { TooltipManager } from './ui/ToolTipManager.js';
@@ -112,6 +112,8 @@ const treeViewer = new ContractTreeViewer('tab-tree');
 const catalogViewer = new RuleCatalogViewer('tab-catalog', engine);
 const datasetSummaryViewer = new DatasetSummaryViewer('datasetSummaryRoot');
 datasetSummaryViewer.reset();
+const datasetPreviewViewer = new DatasetPreviewViewer('datasetPreviewRoot');
+datasetPreviewViewer.reset();
 
 if (ui.fileInput) {
   ui.fileInput.addEventListener('change', () => {
@@ -119,14 +121,13 @@ if (ui.fileInput) {
   });
 }
 
+const datasetPickerButton = document.getElementById('btnSelectDataset');
+if (datasetPickerButton) {
+  datasetPickerButton.addEventListener('click', () => ui.fileInput?.click());
+}
+
 const tooltipManager = new TooltipManager(); // (si tu UI lo usa; aquí no se invoca directamente)
 const downloader = new FileDownloader();
-
-/**
- * 5) Layout / UX
- * - Permite redimensionar paneles (si existe en tu HTML).
- */
-new LayoutResizer('mainLayout', 'resizeGutter');
 
 /**
  * 6) Validación y reporte v2
@@ -168,6 +169,9 @@ const yamlFileInput = document.getElementById('yamlFileInput');
 const btnEdit = document.getElementById('btnEdit');
 const btnSave = document.getElementById('btnSave');
 const btnCancel = document.getElementById('btnCancel');
+
+initPrimaryNavigation();
+initDatasetTabs();
 
 
 // ============================================================
@@ -250,6 +254,63 @@ function isSameDatasetFile(meta, file) {
   return meta.name === file.name && meta.lastModified === file.lastModified;
 }
 
+function initPrimaryNavigation() {
+  const primaryTabs = document.querySelectorAll('.primary-tabs .tab');
+  const sections = document.querySelectorAll('.section-pane');
+
+  primaryTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.dataset.target;
+
+      primaryTabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      sections.forEach((section) => {
+        if (section.id === targetId) {
+          section.classList.remove('hidden');
+        } else {
+          section.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  const activeTab = document.querySelector('.primary-tabs .tab.active') || primaryTabs[0];
+  if (activeTab) {
+    activeTab.dispatchEvent(new Event('click'));
+  }
+}
+
+function initDatasetTabs() {
+  const container = document.querySelector('.tabs[data-scope="dataset"]');
+  if (!container) return;
+
+  const tabs = container.querySelectorAll('.tab');
+  const panes = document.querySelectorAll('.tab-pane[data-scope="dataset"]');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.dataset.target;
+
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      panes.forEach((pane) => {
+        if (pane.id === targetId) {
+          pane.classList.remove('hidden');
+        } else {
+          pane.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  const activeTab = container.querySelector('.tab.active') || tabs[0];
+  if (activeTab) {
+    activeTab.dispatchEvent(new Event('click'));
+  }
+}
+
 async function handleDatasetSelection() {
   const requestId = ++datasetLoadToken;
   const file = ui.getDatasetFile();
@@ -259,12 +320,14 @@ async function handleDatasetSelection() {
 
   if (!file) {
     datasetSummaryViewer.reset();
+    datasetPreviewViewer.reset();
     ui.updateValidationContext(null);
     ui.setValidateEnabled(false);
     return;
   }
 
   datasetSummaryViewer.showLoading();
+  datasetPreviewViewer.showLoading();
 
   try {
     const rows = await loader.load(file);
@@ -290,6 +353,7 @@ async function handleDatasetSelection() {
     };
 
     datasetSummaryViewer.render(currentDatasetProfile);
+    datasetPreviewViewer.render(rows);
 
     ui.updateValidationContext({
       datasetFileName: file.name,
@@ -303,6 +367,7 @@ async function handleDatasetSelection() {
     if (requestId !== datasetLoadToken) return;
     console.error('[Dataset Preview] Error al procesar dataset', err);
     datasetSummaryViewer.showError(err.message || 'No se pudo generar el resumen del dataset.');
+    datasetPreviewViewer.showError(err.message || 'No se pudo mostrar la vista previa del dataset.');
     ui.updateValidationContext(null);
     ui.setValidateEnabled(false);
   }
