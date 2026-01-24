@@ -12,6 +12,7 @@ export class UIManager {
         this.outputElement = document.getElementById('output');
         this.datasetFileLabel = document.getElementById('datasetFileLabel');
         this.validationContext = document.getElementById('validationContext');
+        this.globalSpinner = document.getElementById('globalSpinner');
 
         // Habilitar el botón solo si hay archivo seleccionado
         if (this.fileInput) {
@@ -39,6 +40,26 @@ export class UIManager {
         this.validateButtons.forEach((btn) => {
             btn.addEventListener('click', () => callback());
         });
+    }
+
+    /**
+     * Muestra el spinner de carga global.
+     */
+    showSpinner() {
+        if (this.globalSpinner) {
+            this.globalSpinner.classList.remove('hidden');
+            // Fuerza reflow para asegurar que se renderiza antes de cambios rápidos
+            this.globalSpinner.offsetHeight;
+        }
+    }
+
+    /**
+     * Oculta el spinner de carga global.
+     */
+    hideSpinner() {
+        if (this.globalSpinner) {
+            this.globalSpinner.classList.add('hidden');
+        }
     }
 
     /**

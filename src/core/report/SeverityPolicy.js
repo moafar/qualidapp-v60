@@ -2,7 +2,7 @@
  * src/core/report/SeverityPolicy.js
  * Responsabilidad: decidir severidad (error|warning|info) para un issue.
  * - Para schema: depende de schema_policy.
- * - Para rule: depende de criticality de la columna (por ahora).
+ * - Para rule: ahora siempre es error (criticality se ignora).
  */
 export class SeverityPolicy {
   /**
@@ -46,15 +46,8 @@ export class SeverityPolicy {
   }
 
   _ruleSeverity(issue, contract) {
-    // Busca criticality de la columna en el contrato
-    const colName = issue.column;
-    const cols = Array.isArray(contract?.columns) ? contract.columns : [];
-    const col = cols.find(c => c?.name === colName);
-
-    const crit = (col?.criticality || 'low').toLowerCase();
-
-    if (crit === 'high') return 'error';
-    if (crit === 'medium') return 'warning';
-    return 'info';
+    // Política simplificada: todas las violaciones de reglas se tratan como error.
+    // El campo criticality del contrato ya no afecta la severidad.
+    return 'error';
   }
 }

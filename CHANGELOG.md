@@ -1,5 +1,30 @@
 # Registro de versiones
 
+## [2.1.0] – 2026-01-24
+### Añadido
+- Spinner global indicador de trabajo en segundo plano: aparece automáticamente durante la carga de contrato YAML o dataset, mostrando overlay semi-transparente y animación de carga centrada.
+- Contador de violaciones por columna en el reporte de validación: ahora cada columna muestra el número de violaciones entre paréntesis (ej: "email_column (5)").
+
+### Cambiado
+- **Simplificación de la política de severidad:** todas las violaciones de reglas se reportan ahora como error, ignorando completamente el parámetro `criticality` de las columnas del contrato.
+- Eliminada la columna "Criticidad" de la tabla de visualización de columnas en el contrato (lectura y edición).
+- Eliminado el filtro de criticidad de la barra de filtros en la pestaña Columnas.
+- Eliminado el badge de criticidad del resumen del dataset (perfil estadístico).
+- Eliminadas opciones de filtrado y ordenamiento por criticidad en el visor del perfil del dataset.
+- Simplificado el reporte de validación:
+  - Remover badges de severidad (E/W/I) del encabezado y grupos.
+  - Remover select de filtro por nivel (Error/Warning/Info) de los controles.
+  - Mostrar solo un contador de violaciones totales en el encabezado.
+  - El mensaje de estado ahora muestra solo violaciones: `"Validación completada con N violación(es)."` o `"Validación completada sin hallazgos."`.
+
+### Arreglado
+- Corregido el comportamiento del toggle de grupos en el reporte de validación después de los cambios en la presentación del contador.
+
+### Notas de compatibilidad / Breaking change
+- El parámetro `criticality` del contrato se mantiene por compatibilidad pero ya no afecta la severidad de las violaciones reportadas.
+- Todos los reportes de validación mostrarán ahora solo violaciones como error, sin distinción de severidad intermedia.
+- El filtrado y ordenamiento por criticidad se ha removido de la UI; contratos existentes con este parámetro seguirán siendo válidos pero no afectarán la visualización.
+
 ## [2.0.1] – 2025-12-31
 ### Arreglado
 - Corregido el cálculo de la barra de progreso para '% Nulos' en el resumen del dataset: ahora muestra correctamente el porcentaje de valores nulos en lugar del porcentaje de no nulos, asegurando que sea complementario al 100% con la columna 'Cobertura'.

@@ -23,7 +23,7 @@
     <header>
         <div class="brand-area">
             <h1>QualidApp V60</h1>
-            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v2.0.1</span>
+            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v2.1.0</span>
         </div>
 
         <div class="tabs header-tabs primary-tabs">
@@ -33,6 +33,15 @@
 
         <div class="header-actions"></div>
     </header>
+
+    <!-- Spinner global para indicar trabajo en segundo plano -->
+    <div id="globalSpinner" class="global-spinner hidden">
+        <div class="spinner-overlay"></div>
+        <div class="spinner-content">
+            <div class="spinner"></div>
+            <p>Procesando...</p>
+        </div>
+    </div>
 
     <main id="appSections" class="primary-content">
         <section id="section-contract" class="section-pane">
@@ -66,12 +75,6 @@
                 <div id="tab-columns" class="tab-pane hidden" data-scope="contract">
                     <div class="toolbar" id="filterToolbar">
                         <input type="text" id="searchFilter" placeholder="Buscar columna..." style="width: 200px;">
-                        <select id="critFilter">
-                            <option value="">Criticidad: Todas</option>
-                            <option value="high">Alta</option>
-                            <option value="medium">Media</option>
-                            <option value="low">Baja</option>
-                        </select>
                         <select id="typeFilter" title="Filtrar por tipo esperado">
                             <option value="">Tipo: todos</option>
                             <option value="identifier">Identificador</option>

@@ -17,7 +17,7 @@
  *  C) Normalizar rows[] -> columnsData{} (vectores por columna)
  *  D) Validar esquema (extra/missing) -> issues tipo "schema"
  *  E) Validar reglas por columna -> issues tipo "rule"
- *  F) Resolver severidad (error|warning|info) con SeverityPolicy
+ *  F) Resolver severidad (solo error; criticality ignorada) con SeverityPolicy
  *  G) Construir reporte v2 (ReportBuilder)
  *  H) Renderizar reporte v2 (ValidationReportViewer)
  *
@@ -123,7 +123,10 @@ if (ui.fileInput) {
 
 const datasetPickerButton = document.getElementById('btnSelectDataset');
 if (datasetPickerButton) {
-  datasetPickerButton.addEventListener('click', () => ui.fileInput?.click());
+  datasetPickerButton.addEventListener('click', () => {
+    ui.showSpinner();
+    ui.fileInput?.click();
+  });
 }
 
 const tooltipManager = new TooltipManager(); // (si tu UI lo usa; aquí no se invoca directamente)
@@ -132,7 +135,7 @@ const downloader = new FileDownloader();
 /**
  * 6) Validación y reporte v2
  * - SchemaValidator: issues "schema" (extra/missing columns)
- * - SeverityPolicy: decide severidad final
+ * - SeverityPolicy: decide severidad final (actualmente fija todo en error)
  * - ReportBuilder: consolida issues en reporte v2 (counters + groups)
  * - ValidationReportViewer: render mínimo del reporte v2
  */
@@ -319,6 +322,7 @@ async function handleDatasetSelection() {
   currentDatasetProfile = null;
 
   if (!file) {
+    ui.hideSpinner();
     datasetSummaryViewer.reset();
     datasetPreviewViewer.reset();
     ui.updateValidationContext(null);
@@ -326,6 +330,7 @@ async function handleDatasetSelection() {
     return;
   }
 
+  // Spinner ya está activo (mostrado desde el click del botón)
   datasetSummaryViewer.showLoading();
   datasetPreviewViewer.showLoading();
 
@@ -370,6 +375,8 @@ async function handleDatasetSelection() {
     datasetPreviewViewer.showError(err.message || 'No se pudo mostrar la vista previa del dataset.');
     ui.updateValidationContext(null);
     ui.setValidateEnabled(false);
+  } finally {
+    ui.hideSpinner();
   }
 }
 
@@ -436,19 +443,31 @@ yamlInput.addEventListener('input', syncFromText);
 // ============================================================
 
 if (btnLoadYaml) {
-  btnLoadYaml.addEventListener('click', () => yamlFileInput.click());
+  btnLoadYaml.addEventListener('click', () => {
+    ui.showSpinner();
+    yamlFileInput.click();
+  });
 }
 
 if (yamlFileInput) {
   yamlFileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      ui.hideSpinner();
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (evt) => {
       yamlInput.value = evt.target.result;
       syncFromText();
       ui.outputElement.innerHTML = `<div style="color:green; font-weight:bold">📂 Contrato "${file.name}" cargado.</div>`;
+      // Pequeño delay para asegurar que el spinner sea visible incluso en archivos pequeños
+      setTimeout(() => ui.hideSpinner(), 100);
+    };
+    reader.onerror = () => {
+      ui.hideSpinner();
+      ui.showError('Error al leer el archivo de contrato.');
     };
     reader.readAsText(file);
   });
@@ -537,7 +556,8 @@ if (btnCancel) {
  */
 ui.bindValidateClick(async () => {
   try {
-    // 0) UX: mostrar “cargando…”
+    // 0) UX: mostrar spinner y loading
+    ui.showSpinner();
     ui.showLoading();
     datasetSummaryViewer.showLoading();
 
@@ -676,7 +696,7 @@ ui.bindValidateClick(async () => {
           context: {}
         };
 
-        // Resolver severidad final con SeverityPolicy (criticality, etc.)
+        // Resolver severidad final con SeverityPolicy (ahora siempre error; criticality ignorada)
         const level = severityPolicy.resolve(issue, contract);
 
         // Registrar issue en el reporte v2
@@ -699,22 +719,21 @@ ui.bindValidateClick(async () => {
 
     // 12) Mensaje breve de estado:
     const hadErrors = (finalReport.counters?.errors || 0) > 0;
-    const hadWarnings = (finalReport.counters?.warnings || 0) > 0;
 
     const msg =
       hadErrors
-        ? `❌ Validación completada con errores: ${finalReport.counters.errors} error(es), ${finalReport.counters.warnings} warning(s).`
-        : hadWarnings
-        ? `⚠️ Validación completada con warnings: ${finalReport.counters.warnings} warning(s).`
+        ? `❌ Validación completada con ${finalReport.counters.errors} violación(es).`
         : `✅ Validación completada sin hallazgos.`;
 
     // Mensaje final (resumen) usando el canal existente
-    // Si hay errores: rojo. Si solo warnings: naranja. Si limpio: verde.
-    const color = hadErrors ? '#d32f2f' : (hadWarnings ? '#f57c00' : '#388e3c');
+    // Si hay errores: rojo. Si limpio: verde.
+    const color = hadErrors ? '#d32f2f' : '#388e3c';
     ui.outputElement.innerHTML = `<div style="color:${color}; font-weight:bold">${msg}</div>`;
 
+    ui.hideSpinner();
 
   } catch (err) {
+    ui.hideSpinner();
     ui.showError(err.message);
   }
 });

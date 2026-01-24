@@ -77,23 +77,12 @@ export class ValidationReportViewer {
     return `
       <div class="report-header">
         <div class="report-counters">
-          <span class="badge badge-error">error: ${counters.errors ?? 0}</span>
-          <span class="badge badge-warning">warning: ${counters.warnings ?? 0}</span>
-          <span class="badge badge-info">info: ${counters.info ?? 0}</span>
-          <span class="muted">total: ${totalIssues}</span>
-          <span class="muted">mostrados: ${shownIssues}</span>
+          <span class="badge badge-violations">violaciones: ${totalIssues}</span>
+          ${totalIssues !== shownIssues ? `<span class="muted">mostrados: ${shownIssues}</span>` : ''}
         </div>
 
         <div class="report-controls">
-          <label class="muted">Nivel:</label>
-          <select id="vr_level" class="report-select">
-            <option value="all"${level === 'all' ? ' selected' : ''}>All</option>
-            <option value="error"${level === 'error' ? ' selected' : ''}>Error</option>
-            <option value="warning"${level === 'warning' ? ' selected' : ''}>Warning</option>
-            <option value="info"${level === 'info' ? ' selected' : ''}>Info</option>
-          </select>
-
-          <label class="muted" style="margin-left:10px;">Buscar:</label>
+          <label class="muted">Buscar:</label>
           <input id="vr_q" class="report-input" type="text" placeholder="columna, regla, mensaje, valor..."
                  value="${this._escape(q)}" />
         </div>
@@ -126,21 +115,12 @@ export class ValidationReportViewer {
     const safeCol = this._escape(col);
     const expanded = this.state.expanded.has(col);
 
-    const c = group.counters;
-    const badgeHtml = `
-      <span class="badge badge-error">E ${c.errors}</span>
-      <span class="badge badge-warning">W ${c.warnings}</span>
-      <span class="badge badge-info">I ${c.info}</span>
-      <span class="muted">(${group.issues.length})</span>
-    `;
-
     const body = expanded ? this._renderIssuesTable(group.issues) : '';
 
     return `
       <div class="report-group">
         <button class="report-group-header" data-col="${safeCol}">
-          <span class="report-group-title">${safeCol}</span>
-          <span class="report-group-badges">${badgeHtml}</span>
+          <span class="report-group-title">${safeCol} (${group.issues.length})</span>
           <span class="report-group-chevron">${expanded ? '▾' : '▸'}</span>
         </button>
         ${expanded ? `<div class="report-group-body">${body}</div>` : ''}
@@ -260,10 +240,8 @@ export class ValidationReportViewer {
   // ------------------------------------------------------------
 
   _wireEvents() {
-    const levelSel = this.container.querySelector('#vr_level');
     const qInput = this.container.querySelector('#vr_q');
 
-    if (levelSel) levelSel.addEventListener('change', this._onLevelChange);
     if (qInput) qInput.addEventListener('input', this._onSearch);
 
     // Delegación: headers de grupos
@@ -297,13 +275,10 @@ export class ValidationReportViewer {
     const col = e.currentTarget.getAttribute('data-col');
     if (!col) return;
 
-    // col viene escapado en HTML; lo usamos tal cual como key:
-    // como nosotros escapamos consistente, la key en expanded debe ser el texto real.
-    // Para evitar discrepancias, tomamos el texto mostrado:
-    const displayed = e.currentTarget.querySelector('.report-group-title')?.textContent || col;
-
-    if (this.state.expanded.has(displayed)) this.state.expanded.delete(displayed);
-    else this.state.expanded.add(displayed);
+    // col es el nombre de la columna escapado. Lo usamos directamente como clave,
+    // sin depender del texto mostrado que incluye el conteo entre paréntesis.
+    if (this.state.expanded.has(col)) this.state.expanded.delete(col);
+    else this.state.expanded.add(col);
 
     this.render(this._report);
   }

@@ -120,7 +120,7 @@ export class ContractViewer {
         this.containerOverview.innerHTML = html;
     }
 
-    renderColumns(contract, filterText = '', filterCrit = '', filterType = '') {
+    renderColumns(contract, filterText = '', filterType = '') {
         // OJO: en vez de pintar sobre #tab-columns, pintamos sobre su área scrolleable
         const scrollArea = this.containerColumns.querySelector('.columns-scroll');
 
@@ -138,16 +138,14 @@ export class ContractViewer {
 
         let cols = contract.columns;
 
-        if (!this.isEditMode && (filterText || filterCrit || filterType)) {
+        if (!this.isEditMode && (filterText || filterType)) {
             cols = cols.filter(c => {
             const matchText =
                 (c.name || '').toLowerCase().includes((filterText || '').toLowerCase()) ||
                 (c.description || '').toLowerCase().includes((filterText || '').toLowerCase());
-
-            const matchCrit = filterCrit ? c.criticality === filterCrit : true;
             const matchType = filterType ? c.expected_type === filterType : true;
 
-            return matchText && matchCrit && matchType;
+            return matchText && matchType;
             });
         }
 
@@ -168,8 +166,7 @@ export class ContractViewer {
                 <th width="15%" data-tooltip="Nombre exacto de la columna en el dataset.">Columna</th>
                 <th width="15%" data-tooltip="Indica si la columna contiene datos sensibles.">Sensitive</th>
                 <th width="10%" data-tooltip="Tipo de dato esperado (text, numeric, date, etc.).">Tipo</th>
-                <th width="10%" data-tooltip="Importancia de la columna. Un fallo High detiene el proceso.">Criticidad</th>
-                <th width="30%" data-tooltip="Descripción funcional del campo.">Descripción</th>
+                <th width="35%" data-tooltip="Descripción funcional del campo.">Descripción</th>
                 <th width="20%" data-tooltip="Reglas de validación aplicadas a esta columna (Ej: required, range, regex).">Reglas</th>
                 ${this.isEditMode ? '<th width="50px"></th>' : ''}
                 </tr>
@@ -195,12 +192,6 @@ export class ContractViewer {
     
     _renderRowRead(col) {
     const typeClass = `b-${col.expected_type || 'text'}`;
-    const critColor =
-        col.criticality === 'high'
-        ? 'var(--crit-high-fg)'
-        : col.criticality === 'medium'
-        ? 'var(--crit-med-fg)'
-        : 'var(--crit-low-fg)';
 
     // Detecta sensibilidad desde el nuevo campo escalar
     const s = (col.sensitivity || '').toLowerCase();
@@ -249,7 +240,6 @@ export class ContractViewer {
         <td><code style="font-weight:bold;">${col.name}</code></td>
         <td class="col-sensitive">${sensitiveBadge || ''}</td>
         <td><span class="badge ${typeClass}">${col.expected_type || 'text'}</span></td>
-        <td style="color:${critColor}; font-weight:600; font-size:12px;">${col.criticality || 'low'}</td>
         <td style="color:var(--text-muted)">${col.description || '—'}</td>
         <td>${rulesHtml}</td>
         </tr>
@@ -279,13 +269,8 @@ export class ContractViewer {
                     </select>
                 </td>
                 <td>
-                     <select class="edit-col" data-idx="${index}" data-field="criticality" style="width:100%">
-                        <option value="low" ${col.criticality==='low'?'selected':''}>low</option>
-                        <option value="medium" ${col.criticality==='medium'?'selected':''}>medium</option>
-                        <option value="high" ${col.criticality==='high'?'selected':''}>high</option>
-                    </select>
+                    <input type="text" class="edit-col" data-idx="${index}" data-field="description" value="${col.description || ''}" style="width:100%">
                 </td>
-                <td><input type="text" class="edit-col" data-idx="${index}" data-field="description" value="${col.description || ''}" style="width:100%"></td>
                 <td style="text-align:center;">
                     <div style="display:flex; gap:6px; justify-content:center; align-items:center;">
                         <button class="btn-header" data-action="del-col" data-idx="${index}" style="color:red; border:none; padding:5px 8px;">×</button>
@@ -378,7 +363,7 @@ export class ContractViewer {
             // Añadir Columna
             if (e.target.dataset.action === 'add-col') {
                 if (!this.currentContract.columns) this.currentContract.columns = [];
-                this.currentContract.columns.push({ name: 'nueva_columna', expected_type: 'text', criticality: 'low' });
+                this.currentContract.columns.push({ name: 'nueva_columna', expected_type: 'text' });
                 this.renderColumns(this.currentContract);
             }
             // Eliminar Columna
@@ -456,7 +441,6 @@ export class ContractViewer {
 
     _initFilters() {
         const searchInput = document.getElementById('searchFilter');
-        const critSelect = document.getElementById('critFilter');
         const typeSelect = document.getElementById('typeFilter');
         
         // La función de filtro se ejecuta y fuerza el redibujado de columnas
@@ -465,14 +449,12 @@ export class ContractViewer {
                 this.renderColumns(
                     this.currentContract,
                     searchInput?.value || '',
-                    critSelect?.value || '',
                     typeSelect?.value || ''      // <- PASAR EL TIPO
                 );
             }
         };
 
         if(searchInput) searchInput.addEventListener('input', apply);
-        if(critSelect) critSelect.addEventListener('change', apply);
         if(typeSelect) typeSelect.addEventListener('change', apply);
     }
 

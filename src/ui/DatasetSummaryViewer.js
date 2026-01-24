@@ -11,7 +11,6 @@ export class DatasetSummaryViewer {
       type: 'all',
       status: 'all',
       sort: 'name',
-      onlyCritical: false,
       expanded: new Set(),
     };
 
@@ -19,7 +18,6 @@ export class DatasetSummaryViewer {
     this._handleTypeChange = this._handleTypeChange.bind(this);
     this._handleStatusChange = this._handleStatusChange.bind(this);
     this._handleSortChange = this._handleSortChange.bind(this);
-    this._handleCriticalToggle = this._handleCriticalToggle.bind(this);
     this._handleToggleRow = this._handleToggleRow.bind(this);
   }
 
@@ -158,16 +156,10 @@ export class DatasetSummaryViewer {
                 ['nulls', 'Nulos'],
                 ['coverage', 'Cobertura'],
                 ['distinct', 'Unicidad'],
-                ['criticality', 'Criticidad'],
               ],
               this.state.sort
             )}
           </select>
-
-          <label class="ds-critical-toggle">
-            <input type="checkbox" id="ds-critical" ${this.state.onlyCritical ? 'checked' : ''}>
-            Solo criticidad alta
-          </label>
         </div>
       </div>
     `;
@@ -361,9 +353,6 @@ export class DatasetSummaryViewer {
 
   _renderColBadges(col) {
     const badges = [];
-    if (col.criticality) {
-      badges.push(`<span class="ds-badge crit-${col.criticality}">${col.criticality}</span>`);
-    }
     if (col.sensitivity) {
       badges.push(`<span class="ds-badge sens-${col.sensitivity}">${col.sensitivity}</span>`);
     }
@@ -407,7 +396,6 @@ export class DatasetSummaryViewer {
     return columns.filter((col) => {
       if (!col) return false;
       if (this.state.status !== 'all' && col.status !== this.state.status) return false;
-      if (this.state.onlyCritical && col.criticality !== 'high') return false;
       if (this.state.type !== 'all' && col.typeInferred !== this.state.type) return false;
 
       if (this.state.search) {
@@ -441,9 +429,6 @@ export class DatasetSummaryViewer {
       case 'distinct':
         sorted.sort((a, b) => (b.stats?.uniqueRatio || 0) - (a.stats?.uniqueRatio || 0));
         break;
-      case 'criticality':
-        sorted.sort((a, b) => this._critScore(b.criticality) - this._critScore(a.criticality));
-        break;
       default:
         sorted.sort((a, b) => collator.compare(a.name, b.name));
     }
@@ -462,13 +447,11 @@ export class DatasetSummaryViewer {
     const type = this.container.querySelector('#ds-type');
     const status = this.container.querySelector('#ds-status');
     const sort = this.container.querySelector('#ds-sort');
-    const critical = this.container.querySelector('#ds-critical');
 
     if (search) search.addEventListener('input', this._handleSearch);
     if (type) type.addEventListener('change', this._handleTypeChange);
     if (status) status.addEventListener('change', this._handleStatusChange);
     if (sort) sort.addEventListener('change', this._handleSortChange);
-    if (critical) critical.addEventListener('change', this._handleCriticalToggle);
 
     this.container.querySelectorAll('[data-action="toggle-row"]').forEach((btn) => {
       btn.addEventListener('click', this._handleToggleRow);
@@ -492,11 +475,6 @@ export class DatasetSummaryViewer {
 
   _handleSortChange(e) {
     this.state.sort = e.target.value;
-    this.render(this.profile);
-  }
-
-  _handleCriticalToggle(e) {
-    this.state.onlyCritical = Boolean(e.target.checked);
     this.render(this.profile);
   }
 
