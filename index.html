@@ -23,7 +23,7 @@
     <header>
         <div class="brand-area">
             <h1>QualidApp V60</h1>
-            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v2.1.0</span>
+            <span id="versionBadge" class="badge" style="background:#f1f5f9; color:#64748b;">v2.2.0</span>
         </div>
 
         <div class="tabs header-tabs primary-tabs">
@@ -47,8 +47,15 @@
         <section id="section-contract" class="section-pane">
             <div class="section-actions">
                 <div class="action-group">
+                    <label for="contractSelect" class="inline-label">Contrato</label>
+                    <select id="contractSelect" class="contract-select">
+                        <option value="">Selecciona un contrato para visualizar</option>
+                    </select>
+                </div>
+                <div class="action-group">
                     <input type="file" id="yamlFileInput" accept=".yaml,.yml" style="display:none;">
                     <button id="btnLoadYaml" class="btn-header icon-btn">📂 Importar Contrato</button>
+                    <span class="action-hint">El editor es solo para lectura/edición manual; la validación usa el selector de esta sección.</span>
                 </div>
                 <div class="action-group">
                     <button id="btnEdit" class="btn-header icon-btn">✏️ Editar contrato</button>
@@ -101,6 +108,12 @@
 
         <section id="section-dataset" class="section-pane hidden">
             <div class="section-actions">
+                <div class="action-group">
+                    <label for="contractSelectDataset" class="inline-label">Contrato</label>
+                    <select id="contractSelectDataset" class="contract-select">
+                        <option value="">Selecciona un contrato para validar</option>
+                    </select>
+                </div>
                 <div class="action-group">
                     <input type="file" id="fileInput" accept=".xlsx, .csv" style="display:none;">
                     <button id="btnSelectDataset" class="btn-header icon-btn">📁 Seleccionar dataset</button>

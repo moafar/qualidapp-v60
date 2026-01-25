@@ -46,6 +46,7 @@ import { RuleEngine } from './core/RuleEngine.js';
 // --- Infraestructura (I/O) ---
 import { YamlContractParser } from './infrastructure/YamlContractParser.js';
 import { ExcelDatasetLoader } from './infrastructure/ExcelDatasetLoader.js';
+import { ContractRepository } from './infrastructure/ContractRepository.js';
 
 // --- UI (controladores / vistas) ---
 import { UIManager } from './ui/UIManager.js';
@@ -97,6 +98,7 @@ window.engine = engine;
  */
 const parser = new YamlContractParser();
 const loader = new ExcelDatasetLoader();
+const contractRepository = new ContractRepository({ parser });
 const datasetProfiler = new DatasetProfiler();
 
 /**
@@ -114,6 +116,12 @@ const datasetSummaryViewer = new DatasetSummaryViewer('datasetSummaryRoot');
 datasetSummaryViewer.reset();
 const datasetPreviewViewer = new DatasetPreviewViewer('datasetPreviewRoot');
 datasetPreviewViewer.reset();
+
+ui.bindContractChange(async (contractId) => {
+  await handleContractSelection(contractId);
+});
+
+initContractSelector();
 
 if (ui.fileInput) {
   ui.fileInput.addEventListener('change', () => {
@@ -159,6 +167,9 @@ let currentDatasetProfile = null;
 let currentDatasetRows = null;
 let currentDatasetMeta = null;
 let datasetLoadToken = 0;
+let selectedContract = null;
+let selectedContractMeta = null;
+let selectedContractReadOnly = false;
 
 
 // ============================================================
@@ -242,19 +253,56 @@ function buildColumnsData(rows) {
   return { columnsData, datasetColumns: Array.from(datasetColumnsSet) };
 }
 
-function getSafeContract() {
-  if (currentContractObj) return currentContractObj;
-  try {
-    return parser.parse(yamlInput.value);
-  } catch (err) {
-    console.warn('[Contract] YAML inválido al intentar obtener contrato para dataset', err);
-    return null;
-  }
-}
-
 function isSameDatasetFile(meta, file) {
   if (!meta || !file) return false;
   return meta.name === file.name && meta.lastModified === file.lastModified;
+}
+
+function getSelectedContractColumns() {
+  return Array.isArray(selectedContract?.columns) ? selectedContract.columns : [];
+}
+
+function getSelectedContractLabel() {
+  return (
+    selectedContract?.dataset?.title ||
+    selectedContract?.dataset?.id ||
+    selectedContract?.id ||
+    selectedContractMeta?.name ||
+    '—'
+  );
+}
+
+function getSelectedContractVersion() {
+  return selectedContract?.contract_version || selectedContractMeta?.version || null;
+}
+
+function applyReadOnlyContractMode(isReadOnly) {
+  if (yamlInput) yamlInput.disabled = Boolean(isReadOnly);
+  if (btnEdit) btnEdit.disabled = Boolean(isReadOnly);
+
+  if (isReadOnly) {
+    btnSave?.classList.add('hidden');
+    btnCancel?.classList.add('hidden');
+    btnEdit?.classList.remove('hidden');
+  }
+}
+
+function renderContractFromSelection(contract, yamlText) {
+  if (!contract) return;
+
+  viewer.toggleEdit(false);
+  viewer.render(contract);
+  treeViewer.render(contract);
+
+  if (!catalogViewer._rendered) {
+    catalogViewer.render();
+    catalogViewer._rendered = true;
+  }
+
+  const text = yamlText || parser.stringify(contract);
+  if (yamlInput) {
+    yamlInput.value = text;
+  }
 }
 
 function initPrimaryNavigation() {
@@ -320,13 +368,14 @@ async function handleDatasetSelection() {
   currentDatasetRows = null;
   currentDatasetMeta = null;
   currentDatasetProfile = null;
+  ui.setDatasetSelected(false);
 
   if (!file) {
     ui.hideSpinner();
     datasetSummaryViewer.reset();
     datasetPreviewViewer.reset();
     ui.updateValidationContext(null);
-    ui.setValidateEnabled(false);
+    ui.setDatasetSelected(false);
     return;
   }
 
@@ -339,8 +388,7 @@ async function handleDatasetSelection() {
     const { columnsData, datasetColumns } = buildColumnsData(rows);
     if (requestId !== datasetLoadToken) return;
     // Columnas declaradas por contrato (si existe)
-    const contract = getSafeContract();
-    const contractCols = Array.isArray(contract?.columns) ? contract.columns : [];
+    const contractCols = getSelectedContractColumns();
 
     currentDatasetProfile = datasetProfiler.profile({
       rows,
@@ -364,20 +412,114 @@ async function handleDatasetSelection() {
       datasetFileName: file.name,
       datasetRows: rows.length,
       datasetColumns: datasetColumns.length,
-      contractLabel: contract?.dataset?.title || contract?.dataset?.id || contract?.id || '—',
-      contractVersion: contract?.contract_version || null,
+      contractLabel: getSelectedContractLabel(),
+      contractVersion: getSelectedContractVersion(),
     });
-    ui.setValidateEnabled(true);
+    ui.setDatasetSelected(true);
   } catch (err) {
     if (requestId !== datasetLoadToken) return;
     console.error('[Dataset Preview] Error al procesar dataset', err);
     datasetSummaryViewer.showError(err.message || 'No se pudo generar el resumen del dataset.');
     datasetPreviewViewer.showError(err.message || 'No se pudo mostrar la vista previa del dataset.');
     ui.updateValidationContext(null);
-    ui.setValidateEnabled(false);
+    ui.setDatasetSelected(false);
   } finally {
     ui.hideSpinner();
   }
+}
+
+async function initContractSelector() {
+  ui.setContractStatus('Cargando catálogo...');
+  try {
+    const contracts = await contractRepository.list();
+    ui.setContractOptions(contracts);
+    ui.setContractStatus('Selecciona un contrato para validar.');
+
+    if (contracts.length === 1) {
+      const single = contracts[0];
+      ui.setContractValue(single.id);
+      await handleContractSelection(single.id);
+    }
+  } catch (err) {
+    console.error('[ContractSelector] No se pudo cargar el catálogo', err);
+    ui.setContractStatus(err.message || 'No se pudo cargar el catálogo de contratos.');
+    ui.setContractSelected(false);
+  }
+}
+
+async function handleContractSelection(contractId) {
+  selectedContract = null;
+  selectedContractMeta = null;
+  selectedContractReadOnly = false;
+  ui.setContractSelected(false);
+
+  if (!contractId) {
+    ui.setContractStatus('Selecciona un contrato para validar.');
+    refreshDatasetProfileWithContract();
+    refreshValidationContext();
+    applyReadOnlyContractMode(false);
+    return;
+  }
+
+  ui.setContractStatus('Cargando contrato...');
+  ui.showSpinner();
+
+  try {
+    const payload = await contractRepository.load(contractId);
+    selectedContract = payload.contract;
+    selectedContractMeta = payload;
+    selectedContractReadOnly = true;
+
+    const label = `${payload.name || payload.id}${payload.version ? ` (v${payload.version})` : ''}`;
+    ui.setContractStatus(`Usando ${label}`);
+    ui.setContractSelected(true);
+
+    renderContractFromSelection(selectedContract, payload.yaml);
+    applyReadOnlyContractMode(true);
+
+    refreshDatasetProfileWithContract();
+    refreshValidationContext();
+  } catch (err) {
+    console.error('[ContractSelector] Error al cargar contrato', err);
+    ui.setContractStatus(err.message || 'No se pudo cargar el contrato seleccionado.');
+    ui.setContractSelected(false);
+    applyReadOnlyContractMode(false);
+  } finally {
+    ui.hideSpinner();
+  }
+}
+
+function refreshDatasetProfileWithContract() {
+  if (!currentDatasetMeta || !currentDatasetRows) return;
+  const contractCols = getSelectedContractColumns();
+
+  try {
+    currentDatasetProfile = datasetProfiler.profile({
+      rows: currentDatasetRows,
+      columnsData: currentDatasetMeta.columnsData,
+      datasetColumns: currentDatasetMeta.datasetColumns,
+      contractColumns: contractCols,
+    });
+    datasetSummaryViewer.render(currentDatasetProfile);
+  } catch (err) {
+    console.error('[DatasetProfiler] Error al reprocesar con el contrato seleccionado', err);
+    datasetSummaryViewer.showError(err.message || 'No se pudo generar el resumen del dataset.');
+  }
+}
+
+function refreshValidationContext() {
+  if (!currentDatasetMeta) {
+    ui.updateValidationContext(null);
+    return;
+  }
+
+  ui.updateValidationContext({
+    datasetFileName: currentDatasetMeta.name,
+    datasetRows: currentDatasetRows?.length ?? 0,
+    datasetColumns: currentDatasetMeta.datasetColumns?.length ?? 0,
+    contractLabel: getSelectedContractLabel(),
+    contractVersion: getSelectedContractVersion(),
+  });
 }
 
 
@@ -457,6 +599,9 @@ if (yamlFileInput) {
       return;
     }
 
+    selectedContractReadOnly = false;
+    applyReadOnlyContractMode(false);
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       yamlInput.value = evt.target.result;
@@ -482,6 +627,11 @@ if (btnEdit) {
   btnEdit.addEventListener('click', () => {
     if (!currentContractObj) {
       alert("Primero carga un contrato válido.");
+      return;
+    }
+
+    if (selectedContractReadOnly) {
+      alert('Este contrato proviene del repositorio oficial y es de solo lectura. Importa tu propio YAML para editar.');
       return;
     }
 
@@ -564,8 +714,8 @@ ui.bindValidateClick(async () => {
     // 1) Contrato: fuente de verdad
     // - si existe en memoria (por edición UI), úsalo
     // - si no, parsea el YAML del textarea
-    const contract = currentContractObj ?? parser.parse(yamlInput.value);
-    if (!contract) throw new Error("Contrato inválido.");
+    const contract = selectedContract;
+    if (!contract) throw new Error('Selecciona un contrato del catálogo antes de validar.');
 
     // 2) Dataset file: debe existir
     const file = ui.getDatasetFile();
@@ -614,8 +764,8 @@ ui.bindValidateClick(async () => {
       datasetFileName: file.name,
       datasetRows: rows.length,
       datasetColumns: datasetColumns.length,
-      contractLabel: contract?.dataset?.title || contract?.dataset?.id || contract?.id || '—',
-      contractVersion: contract?.contract_version || null
+      contractLabel: getSelectedContractLabel(),
+      contractVersion: getSelectedContractVersion()
     });
 
     // 6) Columnas declaradas por contrato

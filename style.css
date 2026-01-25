@@ -250,6 +250,35 @@ header {
   flex-wrap: wrap;
 }
 
+.inline-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.contract-select {
+  height: 36px;
+  min-width: 240px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.contract-select:focus {
+  outline: 2px solid var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.action-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 .section-pane .tab-content {
   min-height: 320px;
 }

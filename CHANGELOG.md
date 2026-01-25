@@ -1,5 +1,20 @@
 # Registro de versiones
 
+## [2.2.0] – 2026-01-25
+### Añadido
+- Selector de contratos disponible tanto en la sección **Contrato** (para visualizar el contenido oficial) como en **Dataset** (para usarlo en validación); ambos dropdowns se sincronizan automáticamente.
+- Visualización directa de contratos del repositorio oficial en la sección Contrato en modo solo lectura; importar un YAML propio desactiva el modo de solo lectura.
+- Etiquetas de reglas `range` y `date-range` muestran el rango configurado en el propio chip (`[min..max]` con límites infinitos cuando faltan valores).
+
+### Cambiado
+- La sección 'Contrato' servirá solamente para visualizar contratos, bien sea seleccionados del selector de contratos o cargados desde el disco.
+- La validación en la sección 'Dataset' se realizará con el contrato seleccionado en el selector de contratos de la misma sección.
+- Los contratos ahora vivirán en el codebase, dentro de la carpeta `contracts`
+- El selector de contratos consume el contenido de `manifest.json` para mostrar los contratos disponibles
+
+### Notas
+- Los mensajes de estado junto a los selectores se eliminaron; solo se mantienen los dropdowns sincronizados.
+
 ## [2.1.0] – 2026-01-24
 ### Añadido
 - Spinner global indicador de trabajo en segundo plano: aparece automáticamente durante la carga de contrato YAML o dataset, mostrando overlay semi-transparente y animación de carga centrada.

@@ -6,6 +6,10 @@ export class UIManager {
     constructor() {
         this.yamlInput = document.getElementById('yamlInput');
         this.fileInput = document.getElementById('fileInput');
+        this.contractSelect = document.getElementById('contractSelect');
+        this.contractSelectDataset = document.getElementById('contractSelectDataset');
+        this.contractSelectStatus = document.getElementById('contractSelectStatus');
+        this.contractSelectStatusDataset = document.getElementById('contractSelectStatusDataset');
         this.btnValidate = document.getElementById('btnValidate');
         this.btnValidateDataset = document.getElementById('btnValidateDataset');
         this.validateButtons = [this.btnValidate, this.btnValidateDataset].filter(Boolean);
@@ -14,18 +18,49 @@ export class UIManager {
         this.validationContext = document.getElementById('validationContext');
         this.globalSpinner = document.getElementById('globalSpinner');
 
+        this._datasetSelected = false;
+        this._contractSelected = false;
+        this._contractChangeHandler = null;
+
         // Habilitar el botón solo si hay archivo seleccionado
         if (this.fileInput) {
             this.fileInput.addEventListener('change', () => {
-                this.setValidateEnabled(Boolean(this.fileInput.files.length));
+                this.setDatasetSelected(false);
                 this.setDatasetFileName(this.fileInput.files[0]?.name || null);
                 this.updateValidationContext(null);
             });
         }
 
+        const handleContractChange = (value, source) => {
+            this._contractSelected = false;
+            this._updateValidateEnabled();
+
+            if (source === 'contract' && this.contractSelectDataset) {
+                this.contractSelectDataset.value = value;
+            } else if (source === 'dataset' && this.contractSelect) {
+                this.contractSelect.value = value;
+            }
+
+            if (typeof this._contractChangeHandler === 'function') {
+                this._contractChangeHandler(value);
+            }
+        };
+
+        if (this.contractSelect) {
+            this.contractSelect.addEventListener('change', () => {
+                handleContractChange(this.contractSelect.value, 'contract');
+            });
+        }
+
+        if (this.contractSelectDataset) {
+            this.contractSelectDataset.addEventListener('change', () => {
+                handleContractChange(this.contractSelectDataset.value, 'dataset');
+            });
+        }
+
         this.setDatasetFileName(null);
         this.updateValidationContext(null);
-        this.setValidateEnabled(false);
+        this._updateValidateEnabled();
     }
 
     getContractText() {
@@ -40,6 +75,10 @@ export class UIManager {
         this.validateButtons.forEach((btn) => {
             btn.addEventListener('click', () => callback());
         });
+    }
+
+    bindContractChange(callback) {
+        this._contractChangeHandler = callback;
     }
 
     /**
@@ -177,6 +216,43 @@ export class UIManager {
         this.validateButtons.forEach((btn) => {
             btn.disabled = !enabled;
         });
+    }
+
+    setContractOptions(contracts) {
+        const defaultOptionContract = '<option value="">Selecciona un contrato para visualizar</option>';
+        const defaultOptionDataset = '<option value="">Selecciona un contrato para validar</option>';
+        const options = (contracts || [])
+            .map((c) => `<option value="${c.id}">${c.name || c.id}${c.version ? ` (v${c.version})` : ''}</option>`)
+            .join('');
+
+        if (this.contractSelect) {
+            this.contractSelect.innerHTML = `${defaultOptionContract}${options}`;
+        }
+        if (this.contractSelectDataset) {
+            this.contractSelectDataset.innerHTML = `${defaultOptionDataset}${options}`;
+        }
+    }
+
+    setContractStatus(_message) {}
+
+    setContractSelected(isReady) {
+        this._contractSelected = Boolean(isReady);
+        this._updateValidateEnabled();
+    }
+
+    setDatasetSelected(isReady) {
+        this._datasetSelected = Boolean(isReady);
+        this._updateValidateEnabled();
+    }
+
+    setContractValue(contractId) {
+        const value = contractId || '';
+        if (this.contractSelect) this.contractSelect.value = value;
+        if (this.contractSelectDataset) this.contractSelectDataset.value = value;
+    }
+
+    _updateValidateEnabled() {
+        this.setValidateEnabled(this._datasetSelected && this._contractSelected);
     }
 
     _formatNumber(value) {

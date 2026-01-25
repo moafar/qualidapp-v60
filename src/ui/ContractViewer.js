@@ -215,6 +215,13 @@ export class ContractViewer {
         const ruleId = r.id;
         const description = RULE_DESCRIPTIONS[ruleId] || RULE_DESCRIPTIONS.default;
 
+        const hasMin = r.min !== undefined && r.min !== null && r.min !== '';
+        const hasMax = r.max !== undefined && r.max !== null && r.max !== '';
+        const rangeLabel = (minLabel, maxLabel) => `${ruleId} [${minLabel}..${maxLabel}]`;
+        const displayLabel = (ruleId === 'range' || ruleId === 'date-range')
+            ? rangeLabel(hasMin ? r.min : '-inf', hasMax ? r.max : '+inf')
+            : ruleId;
+
         let tooltipContent = `<strong style="font-size:13px;">Regla: ${ruleId}</strong><br>`;
         tooltipContent += `<span style="color:#a0aec0;">Descripción:</span> ${description}<br>`;
 
@@ -230,7 +237,7 @@ export class ContractViewer {
                     data-tooltip="${tooltipContent.replace(/"/g, '&quot;')}"
                     data-action="show-catalog"
                     data-rule-id="${ruleId}">
-                    ${ruleId}
+                    ${displayLabel}
                 </div>`;
         })
         .join('');
