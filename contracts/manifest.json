@@ -1,0 +1,25 @@
+{
+  "contracts": [
+    {
+      "id": "obsino_clisueno_basal",
+      "name": "Polisomnografía basal",
+      "version": "2.0.0",
+      "description": "Contrato de datos para estudios basales de polisomnografía.",
+      "path": "contracts/v2.0.0-obsino_clisueno_basal.yaml"
+    },
+    {
+      "id": "obsino_clisueno_xpap",
+      "name": "Titulación CPAP/BPAP",
+      "version": "2.0.0",
+      "description": "Contrato de datos para polisomnografía en titulación de CPAP/BPAP.",
+      "path": "contracts/v2.0.0-obsino_clisueno_xpap.yaml"
+    },
+    {
+      "id": "obsino_labfp_espirometria",
+      "name": "Espirometría",
+      "version": "2.0.0",
+      "description": "Contrato de datos para pruebas de función pulmonar y espirometría.",
+      "path": "contracts/v2.0.0-obsino_labfp_espirometria.yaml"
+    }
+  ]
+}
