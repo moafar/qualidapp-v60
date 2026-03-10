@@ -1,0 +1,522 @@
+contract_version: 1.0.0
+history:
+- version: 1.0.0
+  date: 2026-02-23
+  author: Observatorio
+  description: Contrato generado desde contract_model.yaml usando como referencia
+    v3.0.0-obsino_labfp_espirometria.yaml y el dataset ejemplo_10_filas.xlsx.
+dataset:
+  id: obsino_labfp_espirometria_extractor
+  title: LABFP Espirometría (extractor)
+  description: Contrato de validación para el dataset extraído desde el sistema de
+    espirometría (formato original del extractor).
+  owner: Observatorio
+  domain: labfp
+  tags:
+  - labfp
+  - espirometria
+  - extractor
+  - staging
+  source_file: ejemplo_10_filas.xlsx
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+rule_catalog:
+- id: required
+  description: El campo no puede ser nulo o vacío.
+- id: unique
+  description: Todos los valores del campo deben ser únicos.
+- id: range
+  description: El valor debe estar en un rango numérico.
+- id: date-range
+  description: La fecha debe estar entre min y max.
+- id: domain
+  description: El valor debe pertenecer a una lista permitida.
+- id: regex
+  description: El valor debe cumplir una expresión regular.
+columns:
+- name: Visit Date
+  expected_type: datetime
+  description: Fecha de realización de la prueba.
+  rules:
+  - id: required
+- name: ID
+  expected_type: identifier
+  description: Identificación del paciente.
+  normalization:
+  - trim
+  rules:
+  - id: required
+  sensitivity: pii
+- name: Last Name
+  expected_type: text
+  description: Apellidos del paciente.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: required
+  sensitivity: pii
+- name: Middle Name
+  expected_type: text
+  description: Segundo nombre del paciente (si aplica).
+  normalization:
+  - trim
+  - uppercase
+  rules: null
+  sensitivity: pii
+- name: First Name
+  expected_type: text
+  description: Nombres del paciente.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: required
+  sensitivity: pii
+- name: DOB
+  expected_type: numeric
+  description: Fecha de nacimiento en formato dd/mm/yyyy.
+  rules:
+  - id: range
+    min: 0
+    max: 60000
+  sensitivity: pii
+- name: Age
+  expected_type: numeric
+  description: Edad en años.
+  rules:
+  - id: required
+  - id: range
+    min: 0
+    max: 110
+- name: Sex
+  expected_type: categorical
+  description: Sexo del paciente.
+  normalization:
+  - trim
+  rules:
+  - id: required
+  - id: domain
+    values:
+    - Male
+    - Female
+- name: Weight
+  expected_type: numeric
+  description: Peso (kg).
+  rules:
+  - id: range
+    min: 2
+    max: 300
+- name: Height
+  expected_type: numeric
+  description: Talla (cm).
+  rules:
+  - id: range
+    min: 30
+    max: 220
+- name: Race
+  expected_type: categorical
+  description: Etnia/raza reportada.
+  normalization:
+  - trim
+  rules:
+  - id: domain
+    values:
+    - Asian
+    - Black
+    - Caucasian
+    - Hispanic
+    - NE Asian
+    - Other
+  sensitivity: quasi_identifier
+- name: BMI
+  expected_type: numeric
+  description: Índice de masa corporal (kg/m^2).
+  rules:
+  - id: range
+    min: 5
+    max: 80
+- name: BSA
+  expected_type: numeric
+  description: Superficie corporal (m^2).
+  rules:
+  - id: range
+    min: 0.3
+    max: 3.5
+- name: Diagnosis
+  expected_type: text
+  description: Diagnóstico o indicación clínica.
+  normalization:
+  - trim
+  rules: null
+- name: Dyspnea
+  expected_type: categorical
+  description: Disnea (registro clínico / escala según sistema).
+  normalization:
+  - trim
+  rules: null
+- name: Cough
+  expected_type: categorical
+  description: Tos (registro clínico según sistema).
+  normalization:
+  - trim
+  rules: null
+- name: Wheez
+  expected_type: categorical
+  description: Sibilancias (registro clínico según sistema).
+  normalization:
+  - trim
+  rules: null
+- name: Tbco Prod
+  expected_type: categorical
+  description: Producto/producción asociada a tabaquismo (según sistema de captura).
+  normalization:
+  - trim
+  rules: 
+  - id: domain
+    values:
+    - Cigar
+    - Cigarette
+    - E-Cigarette
+    - Marijuana
+    - Never Smoked
+    - Pipe
+    - Vaping
+- name: Yrs Smk
+  expected_type: numeric
+  description: Años fumando.
+  rules:
+  - id: range
+    min: 0
+    max: 90
+- name: Pks/Day
+  expected_type: numeric
+  description: Paquetes por día.
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: Yrs Quit
+  expected_type: numeric
+  description: Años desde que dejó de fumar.
+  rules:
+  - id: range
+    min: 0
+    max: 90
+- name: Pk Yrs
+  expected_type: numeric
+  description: Paquetes-año.
+  rules:
+  - id: range
+    min: 0
+    max: 300
+- name: Pre Test Comments
+  expected_type: text
+  description: Comentarios previos a la prueba.
+  normalization:
+  - trim
+  rules: null
+- name: PF Pre FVC (L)
+  expected_type: numeric
+  description: FVC pre (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF Pre FEV1 (L)
+  expected_type: numeric
+  description: FEV1 pre (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF Pre FEV1/FVC (%)
+  expected_type: numeric
+  description: Relación FEV1/FVC pre (%).
+  rules:
+  - id: range
+    min: 0
+    max: 100
+- name: PF Post FVC (L)
+  expected_type: numeric
+  description: FVC post (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF Post FEV1 (L)
+  expected_type: numeric
+  description: FEV1 post (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF Post FEV1/FVC (%)
+  expected_type: numeric
+  description: Relación FEV1/FVC post (%).
+  rules:
+  - id: range
+    min: 0
+    max: 100
+- name: PF Predicted FVC (L)
+  expected_type: numeric
+  description: FVC predicho (litros).
+  rules:
+  - id: range
+    min: 0.2
+    max: 10
+- name: PF Predicted FEV1 (L)
+  expected_type: numeric
+  description: FEV1 predicho (litros).
+  rules:
+  - id: range
+    min: 0.1
+    max: 10
+- name: PF Predicted FEV1/FVC (%)
+  expected_type: numeric
+  description: Relación FEV1/FVC predicha (%).
+  rules:
+  - id: range
+    min: 10
+    max: 100
+- name: PF LLN FVC (L)
+  expected_type: numeric
+  description: Límite inferior normal (LLN) FVC (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF LLN FEV1 (L)
+  expected_type: numeric
+  description: Límite inferior normal (LLN) FEV1 (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 10
+- name: PF LLN FEV1/FVC (%)
+  expected_type: numeric
+  description: Límite inferior normal (LLN) relación FEV1/FVC (%).
+  rules:
+  - id: range
+    min: 0
+    max: 100
+- name: PF ULN FVC (L)
+  expected_type: numeric
+  description: Límite superior normal (ULN) FVC (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 15
+- name: PF ULN FEV1 (L)
+  expected_type: numeric
+  description: Límite superior normal (ULN) FEV1 (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 15
+- name: PF ULN FEV1/FVC (%)
+  expected_type: numeric
+  description: Límite superior normal (ULN) relación FEV1/FVC (%).
+  rules:
+  - id: range
+    min: 0
+    max: 100
+- name: PF SD FVC (L)
+  expected_type: numeric
+  description: Desviación estándar FVC (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 5
+- name: PF SD FEV1 (L)
+  expected_type: numeric
+  description: Desviación estándar FEV1 (litros).
+  rules:
+  - id: range
+    min: 0
+    max: 5
+- name: PF SD FEV1/FVC (%)
+  expected_type: numeric
+  description: Desviación estándar relación FEV1/FVC (%).
+  rules:
+  - id: range
+    min: 0
+    max: 50
+- name: PFProtocol
+  expected_type: categorical
+  description: Protocolo de prueba.
+  normalization:
+  - trim
+  rules:
+  - id: required
+  - id: domain
+    values:
+    - ATS 1999 5 Breath
+    - PreChlgPost
+- name: Pre FVL ATS Grades
+  expected_type: categorical
+  description: Calificación ATS (pre).
+  rules:
+  - id: domain
+    values:
+    - AA
+  normalization:
+  - trim
+- name: Post FVL ATS Grades
+  expected_type: categorical
+  description: Calificación ATS (post).
+  rules:
+  - id: domain
+    values:
+    - AA
+  normalization:
+  - trim
+- name: Ref Doctor Name
+  expected_type: text
+  description: Campo 'Ref Doctor Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Ref Doctor First Name
+  expected_type: text
+  description: Campo 'Ref Doctor First Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Ref Doctor Last Name
+  expected_type: text
+  description: Campo 'Ref Doctor Last Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Tech Name
+  expected_type: text
+  description: Campo 'Tech Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Tech First Name
+  expected_type: text
+  description: Campo 'Tech First Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Tech Last Name
+  expected_type: text
+  description: Campo 'Tech Last Name'.
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  normalization:
+  - trim
+- name: Signing Doctor Name
+  expected_type: text
+  description: Nombre completo del médico firmante.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  sensitivity: pii
+- name: Signing Doctor First Name
+  expected_type: text
+  description: Nombre(s) del médico firmante.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  sensitivity: pii
+- name: Signing Doctor Last Name
+  expected_type: text
+  description: Apellido(s) del médico firmante.
+  normalization:
+  - trim
+  - uppercase
+  rules:
+  - id: length-range
+    min: 1
+    max: 120
+  - id: max-missing-rate
+    max: 0.5
+  sensitivity: pii
+- name: Signed
+  expected_type: boolean
+  description: Indicador de firma.
+  rules:
+  - id: required
+- name: Signed Date
+  expected_type: datetime
+  description: Fecha y hora de firma.
+  rules: null
+- name: Interpretation
+  expected_type: text
+  description: Interpretación clínica.
+  normalization:
+  - trim
+  rules: null
+- name: Room
+  expected_type: text
+  description: Sala/ubicación (si aplica).
+  normalization:
+  - trim
+  rules: null
+- name: Humidity
+  expected_type: numeric
+  description: Humedad ambiental (%).
+  rules:
+  - id: range
+    min: 0
+    max: 100
+- name: Temp
+  expected_type: numeric
+  description: Temperatura ambiental (°C).
+  rules:
+  - id: range
+    min: 0
+    max: 50
+- name: BarPress
+  expected_type: numeric
+  description: Presión barométrica.
+  rules:
+  - id: range
+    min: 300
+    max: 1100

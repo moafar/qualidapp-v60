@@ -1,0 +1,502 @@
+contract_version: 3.0.0
+
+history:
+  - version: "3.0.0"
+    date: 2026-03-10
+    author: Observatorio
+    description: Contrato de datos para estudios de titulación XPAP (CPAP y BPAP).
+
+dataset:
+  id: stg_clisueno_xpap
+  title: Datos de Estudio de Titulación XPAP
+  description: >
+    Conjunto de datos que contiene información demográfica del paciente,
+    métricas de sueño y respiración, variables de desaturación y parámetros
+    de titulación XPAP, incluyendo equipo, máscara y presión terapéutica.
+  owner: Clínica de Sueño
+  domain: Clínica de sueño
+  tags:
+    - polisomnografia
+    - xpap
+    - titulacion
+  source_file: muestra_xpap.xlsx
+
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+
+rule_catalog:
+  - id: required
+    description: El campo no puede ser nulo.
+  - id: unique
+    description: Todos los valores en el campo deben ser únicos.
+  - id: range
+    description: El valor debe estar dentro de un rango numérico.
+  - id: date-range
+    description: Validación de límite superior e inferior de fechas.
+  - id: domain
+    description: El valor debe estar dentro de una lista de valores permitidos.
+  - id: regex
+    description: El valor debe cumplir con un patrón regex.
+
+columns:
+  - name: pte_nombre
+    source_name: nombre
+    expected_type: text
+    description: Nombre completo del paciente.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: pte_edad_anos
+    source_name: edad_anos
+    expected_type: numeric
+    description: Componente en años de la edad del paciente al momento del estudio.
+    rules:
+      - id: required
+      - id: range
+        min: 0
+        max: 120
+
+  - name: pte_edad_meses
+    source_name: edad_meses
+    expected_type: numeric
+    description: Componente en meses de la edad del paciente.
+    rules:
+      - id: range
+        min: 0
+        max: 11
+
+  - name: pte_edad_dias
+    source_name: edad_dias
+    expected_type: numeric
+    description: Componente en días de la edad del paciente.
+    rules:
+      - id: range
+        min: 0
+        max: 31
+
+  - name: pte_id
+    source_name: id
+    expected_type: identifier
+    description: Identificación del paciente.
+    normalization:
+      - trim
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: pte_peso
+    source_name: peso
+    expected_type: numeric
+    description: Peso corporal del paciente en la unidad indicada por pte_medida_peso.
+    rules:
+      - id: required
+      - id: range
+        min: 2.0
+        max: 300.0
+
+  - name: pte_medida_peso
+    source_name: medida_peso
+    expected_type: categorical
+    description: Unidad de medida reportada para el peso.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["KG", "LB", "LBS"]
+
+  - name: pte_talla
+    source_name: talla
+    expected_type: numeric
+    description: Talla del paciente en la unidad indicada por pte_medida_talla.
+    rules:
+      - id: required
+      - id: range
+        min: 30.0
+        max: 250.0
+
+  - name: pte_medida_talla
+    source_name: medida_talla
+    expected_type: categorical
+    description: Unidad de medida reportada para la talla.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["CM", "M"]
+
+  - name: pte_imc
+    source_name: imc
+    expected_type: numeric
+    description: Índice de masa corporal del paciente.
+    rules:
+      - id: range
+        min: 8.0
+        max: 80.0
+
+  - name: pte_cuello
+    source_name: cuello
+    expected_type: numeric
+    description: Circunferencia de cuello del paciente en la unidad indicada.
+    rules:
+      - id: range
+        min: 10.0
+        max: 80.0
+
+  - name: pte_medida_cuello
+    source_name: medida_cuello
+    expected_type: categorical
+    description: Unidad de medida reportada para la circunferencia de cuello.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["CM", "MM", "IN"]
+
+  - name: pte_perimetro_abdominal
+    source_name: perimetro_abdominal
+    expected_type: numeric
+    description: Perímetro abdominal del paciente en la unidad indicada.
+    rules:
+      - id: range
+        min: 20.0
+        max: 250.0
+
+  - name: pte_medida_perimetro_abdominal
+    source_name: medida_perimetro_abdominal
+    expected_type: categorical
+    description: Unidad de medida reportada para el perímetro abdominal.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["CM", "MM", "IN"]
+
+  - name: xpap_solicita
+    source_name: solicita
+    expected_type: text
+    description: Profesional, médico o servicio que solicita el estudio.
+    normalization:
+      - trim
+    rules: []
+
+  - name: xpap_empresa
+    source_name: empresa
+    expected_type: categorical
+    description: Asegurador o empresa asociada al estudio.
+    normalization:
+      - trim
+    rules:
+      - id: required
+    sensitivity: quasi_identifier
+
+  - name: xpap_fecha_estudio
+    source_name: fecha_estudio
+    expected_type: datetime
+    description: Fecha de realización del estudio de titulación XPAP.
+    rules:
+      - id: required
+      - id: date-range
+        min: "01/01/2020"
+        max: "31/12/2035"
+        format: "DD/MM/YYYY"
+        severity: hard
+
+  - name: xpap_epworth
+    source_name: epworth
+    expected_type: numeric
+    description: Puntaje de la escala de somnolencia de Epworth.
+    rules:
+      - id: range
+        min: 0
+        max: 24
+
+  - name: xpap_tiempo_en_cama
+    source_name: tiempo_en_cama
+    expected_type: numeric
+    description: Tiempo total en cama durante el estudio, en minutos.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_sueno
+    source_name: tiempo_sueno
+    expected_type: numeric
+    description: Tiempo total de sueño durante el estudio, en minutos.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 1200.0
+
+  - name: xpap_eficiencia_sueno
+    source_name: eficiencia_sueno
+    expected_type: numeric
+    description: Eficiencia del sueño como proporción del tiempo de sueño sobre el tiempo en cama.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1.0
+
+  - name: xpap_latencia_sueno_total
+    source_name: latencia_sueno_total
+    expected_type: numeric
+    description: Latencia total al sueño, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 300.0
+
+  - name: xpap_latencia_sueno_rem
+    source_name: latencia_sueno_rem
+    expected_type: numeric
+    description: Latencia al primer episodio REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 600.0
+
+  - name: xpap_indice_microalertamientos
+    source_name: indice_microalertamientos
+    expected_type: numeric
+    description: Índice de microalertamientos expresado en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: xpap_porcentaje_sueno_rem
+    source_name: porcentaje_sueno_rem
+    expected_type: numeric
+    description: Proporción del tiempo total de sueño en fase REM.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1.0
+
+  - name: xpap_porcentaje_sueno_profundo
+    source_name: porcentaje_sueno_profundo
+    expected_type: numeric
+    description: Proporción del tiempo total de sueño en sueño profundo.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1.0
+
+  - name: xpap_iac
+    source_name: iac
+    expected_type: numeric
+    description: Índice de apneas centrales, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: xpap_iao
+    source_name: iao
+    expected_type: numeric
+    description: Índice de apneas obstructivas, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: xpap_iam
+    source_name: iam
+    expected_type: numeric
+    description: Índice de apneas mixtas, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: xpap_ih
+    source_name: ih
+    expected_type: numeric
+    description: Índice de hipopneas, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: xpap_iah
+    source_name: iah
+    expected_type: numeric
+    description: Índice de apnea-hipopnea total, en eventos por hora.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: xpap_indice_desat_rem
+    source_name: indice_desat_rem
+    expected_type: numeric
+    description: Índice de desaturaciones durante REM, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 600.0
+
+  - name: xpap_indice_desat_nrem
+    source_name: indice_desat_nrem
+    expected_type: numeric
+    description: Índice de desaturaciones durante NREM, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1000.0
+
+  - name: xpap_indice_desat_total
+    source_name: indice_desat_total
+    expected_type: numeric
+    description: Índice total de desaturaciones, en eventos por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1600.0
+
+  - name: xpap_tiempo_desat_90_rem
+    source_name: tiempo_desat_90_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 90% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_desat_90_nrem
+    source_name: tiempo_desat_90_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 90% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_desat_80_rem
+    source_name: tiempo_desat_80_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 80% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_desat_80_nrem
+    source_name: tiempo_desat_80_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 80% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_desat_70_rem
+    source_name: tiempo_desat_70_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 70% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_tiempo_desat_70_nrem
+    source_name: tiempo_desat_70_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 70% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: xpap_marca_equipo
+    source_name: marca_equipo
+    expected_type: text
+    description: Marca del equipo utilizado en la titulación XPAP.
+    normalization:
+      - trim
+      - uppercase
+    rules: []
+
+  - name: xpap_tipo_mascara
+    source_name: tipo_mascara
+    expected_type: categorical
+    description: Tipo de máscara utilizada durante la titulación.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["NASAL", "ORONASAL", "FACIAL", "ALMOHADILLAS NASALES", "OTRA"]
+
+  - name: xpap_tamano_mascara
+    source_name: tamano_mascara
+    expected_type: categorical
+    description: Tamaño de la máscara utilizada.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["P", "S", "M", "L", "XL", "PETITE", "SMALL", "MEDIUM", "LARGE"]
+
+  - name: xpap_presion_terapeutica
+    source_name: presion_terapeutica
+    expected_type: numeric
+    description: Presión terapéutica definida durante la titulación, usualmente en cmH2O.
+    rules:
+      - id: range
+        min: 2.0
+        max: 30.0
+
+  - name: xpap_numero_eventos_ah
+    source_name: numero_eventos_ah
+    expected_type: numeric
+    description: Número total de eventos de apnea e hipopnea.
+    rules:
+      - id: range
+        min: 0.0
+        max: 2000.0
+
+  - name: xpap_fuente
+    source_name: fuente
+    expected_type: text
+    description: Ruta o identificador del archivo fuente desde el cual se extrajo el registro.
+    normalization:
+      - trim
+    rules:
+      - id: required
+
+  - name: xpap_uuid
+    source_name: uuid
+    expected_type: identifier
+    description: Identificador único del registro.
+    normalization:
+      - trim
+      - lowercase
+    rules:
+      - id: required
+      - id: unique
+      - id: regex
+        pattern: "^[a-f0-9]{32}$|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+
+  - name: xpap_version_control
+    source_name: version_control
+    expected_type: text
+    description: Campo de trazabilidad del registro y del proceso extractor.
+    normalization:
+      - trim
+    rules:
+      - id: required

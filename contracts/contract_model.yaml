@@ -1,0 +1,94 @@
+contract_version: 2.0.1
+history:
+- version: 2.0.1
+  date: YYYY-MM-DD
+  author: Equipo/Área
+  description: <Descripción de cambios respecto a la versión anterior, p.ej. actualización de reglas, adición de columnas, etc.>
+- version: 2.0.0
+  date: YYYY-MM-DD
+  author: Equipo/Área
+  description: Contrato inicial para <dataset_id>
+dataset:
+  id: <dataset_id>
+  title: <Título del dataset>
+  description: 'Descripción funcional del dataset, origen, alcance y propósito.'
+  owner: <Área responsable>
+  domain: <Dominio>
+  tags:
+  - tag1
+  - tag2
+  source_file: <archivo_origen.xlsx>
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+rule_catalog:
+- id: required
+  description: El campo no puede ser nulo o vacío.
+- id: unique
+  description: Todos los valores del campo deben ser únicos.
+- id: range
+  description: El valor debe estar en un rango numérico.
+- id: date-range
+  description: La fecha debe estar entre min y max.
+- id: domain
+  description: El valor debe pertenecer a una lista permitida.
+- id: regex
+  description: El valor debe cumplir una expresión regular.
+columns:
+- name: <Nombre de columna 1>
+  expected_type: text
+  description: <Descripción de negocio>
+  sensitivity: pii
+  rules:
+  - id: required
+  - id: regex
+    pattern: ^.{1,100}$
+- name: <Nombre de columna 2>
+  expected_type: numeric
+  description: <Descripción de negocio>
+  rules:
+  - id: range
+    min: 0
+    max: 999999
+- name: <Nombre de columna 3>
+  expected_type: categorical
+  description: <Descripción de negocio>
+  rules:
+  - id: domain
+    values:
+    - VALOR_A
+    - VALOR_B
+    - VALOR_C
+- name: <Fecha evento>
+  expected_type: datetime
+  description: <Descripción de negocio>
+  rules:
+  - id: date-range
+    min: 01/01/2000
+    max: 31/12/2099
+    format: DD/MM/YYYY
+normalization:
+  enabled: false
+  notes: Opcional. Declaración de transformaciones permitidas/esperadas. No reemplaza
+    rules; se aplica antes de validar o en el paso de transformación según tu pipeline.
+  operations:
+  - column: <Nombre de columna>
+    when: always
+    actions:
+    - type: trim
+    - type: collapse_whitespace
+    - type: to_upper
+  - column: <Nombre de columna numérica>
+    when: if_present
+    actions:
+    - type: cast
+      to: numeric
+      decimal: .
+      thousands: ','
+  - column: <Fecha evento>
+    when: if_not_null
+    actions:
+    - type: parse_date
+      from_format: DD/MM/YYYY
+      to_format: YYYY-MM-DD

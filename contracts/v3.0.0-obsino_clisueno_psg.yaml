@@ -1,0 +1,464 @@
+contract_version: 3.0.0
+
+history:
+  - version: "3.0.0"
+    date: 2026-03-10
+    author: Observatorio
+    description: >
+      Contrato inicial v3.0.0 para el dataset de estudios de titulación XPAP,
+      construido a partir del archivo real _extract_psg_2026-03-06_22-10.csv
+      y ajustado a la estructura canónica del proyecto.
+
+dataset:
+  id: stg_clisueno_xpap_extract
+  title: Datos extraídos de estudio de titulación XPAP
+  description: >
+    Conjunto de datos extraídos desde informes clínicos de titulación XPAP/CPAP.
+    Incluye datos demográficos, antropométricos, métricas de sueño, índices de
+    eventos respiratorios, desaturación y parámetros terapéuticos del equipo.
+  owner: Clínica de Sueño
+  domain: Clínica de sueño
+  tags:
+    - polisomnografia
+    - xpap
+    - cpap
+    - titulacion
+    - extract
+  source_file: _extract_psg_2026-03-06_22-10.csv
+
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+
+rule_catalog:
+  - id: required
+    description: El campo no puede ser nulo.
+  - id: unique
+    description: Todos los valores en el campo deben ser únicos.
+  - id: range
+    description: El valor debe estar dentro de un rango numérico.
+  - id: date-range
+    description: Validación de límite superior e inferior de fechas.
+  - id: domain
+    description: El valor debe estar dentro de una lista de valores permitidos.
+  - id: regex
+    description: El valor debe cumplir con un patrón regex.
+
+columns:
+  - name: nombre
+    expected_type: text
+    description: Nombre completo del paciente.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: edad_anos
+    expected_type: numeric
+    description: Edad del paciente en años cumplidos al momento del estudio.
+    rules:
+      - id: required
+      - id: range
+        min: 0
+        max: 120
+
+  - name: edad_meses
+    expected_type: numeric
+    description: Componente en meses de la edad del paciente, cuando aplica.
+    rules:
+      - id: range
+        min: 0
+        max: 11
+
+  - name: edad_dias
+    expected_type: numeric
+    description: Componente en días de la edad del paciente, cuando aplica.
+    rules:
+      - id: range
+        min: 0
+        max: 31
+
+  - name: id
+    expected_type: identifier
+    description: Identificador del paciente en el sistema fuente.
+    normalization:
+      - trim
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: peso
+    expected_type: numeric
+    description: Peso corporal del paciente, expresado en la unidad indicada en medida_peso.
+    rules:
+      - id: required
+      - id: range
+        min: 2.0
+        max: 300.0
+
+  - name: medida_peso
+    expected_type: categorical
+    description: Unidad reportada para el peso.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+      - id: domain
+        values: ["KG", "LB", "LBS"]
+
+  - name: talla
+    expected_type: numeric
+    description: Talla del paciente, expresada en la unidad indicada en medida_talla.
+    rules:
+      - id: required
+      - id: range
+        min: 30.0
+        max: 250.0
+
+  - name: medida_talla
+    expected_type: categorical
+    description: Unidad reportada para la talla.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+      - id: domain
+        values: ["CM", "M"]
+
+  - name: imc
+    expected_type: numeric
+    description: Índice de masa corporal del paciente.
+    rules:
+      - id: required
+      - id: range
+        min: 8.0
+        max: 80.0
+
+  - name: cuello
+    expected_type: numeric
+    description: Circunferencia de cuello del paciente.
+    rules:
+      - id: range
+        min: 10.0
+        max: 80.0
+
+  - name: medida_cuello
+    expected_type: categorical
+    description: Unidad reportada para la medida del cuello.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["CM", "MM", "IN"]
+
+  - name: perimetro_abdominal
+    expected_type: numeric
+    description: Perímetro abdominal del paciente.
+    rules:
+      - id: range
+        min: 20.0
+        max: 250.0
+
+  - name: medida_perimetro_abdominal
+    expected_type: categorical
+    description: Unidad reportada para el perímetro abdominal.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: domain
+        values: ["CM", "MM", "IN"]
+
+  - name: solicita
+    expected_type: text
+    description: Profesional o especialidad que solicita el estudio.
+    normalization:
+      - trim
+    rules: []
+
+  - name: empresa
+    expected_type: categorical
+    description: Empresa, asegurador o entidad administrativa asociada al estudio.
+    normalization:
+      - trim
+    rules:
+      - id: required
+    sensitivity: quasi_identifier
+
+  - name: fecha_estudio
+    expected_type: datetime
+    description: Fecha de realización del estudio.
+    rules:
+      - id: required
+      - id: date-range
+        min: "01-01-2020"
+        max: "31-12-2035"
+        format: "DD-MM-YYYY"
+        severity: hard
+
+  - name: epworth
+    expected_type: numeric
+    description: Puntaje de la escala de somnolencia de Epworth.
+    rules:
+      - id: range
+        min: 0
+        max: 24
+
+  - name: tiempo_en_cama
+    expected_type: numeric
+    description: Tiempo total en cama, en minutos.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_sueno
+    expected_type: numeric
+    description: Tiempo total de sueño, en minutos.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 1200.0
+
+  - name: eficiencia_sueno
+    expected_type: numeric
+    description: Eficiencia del sueño expresada en porcentaje.
+    rules:
+      - id: range
+        min: 0.0
+        max: 100.0
+
+  - name: latencia_sueno_total
+    expected_type: numeric
+    description: Latencia total al inicio del sueño, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 300.0
+
+  - name: latencia_sueno_rem
+    expected_type: numeric
+    description: Latencia al primer episodio REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 600.0
+
+  - name: indice_microalertamientos
+    expected_type: numeric
+    description: Índice de microalertamientos por hora de sueño.
+    rules:
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: porcentaje_sueno_rem
+    expected_type: numeric
+    description: Porcentaje del tiempo total de sueño en fase REM.
+    rules:
+      - id: range
+        min: 0.0
+        max: 100.0
+
+  - name: porcentaje_sueno_profundo
+    expected_type: numeric
+    description: Porcentaje del tiempo total de sueño en sueño profundo.
+    rules:
+      - id: range
+        min: 0.0
+        max: 100.0
+
+  - name: iac
+    expected_type: numeric
+    description: Índice de apneas centrales por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: iao
+    expected_type: numeric
+    description: Índice de apneas obstructivas por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: iam
+    expected_type: numeric
+    description: Índice de apneas mixtas por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 150.0
+
+  - name: ih
+    expected_type: numeric
+    description: Índice de hipopneas por hora.
+    rules:
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: iah
+    expected_type: numeric
+    description: Índice de apnea-hipopnea total por hora.
+    rules:
+      - id: required
+      - id: range
+        min: 0.0
+        max: 200.0
+
+  - name: indice_desat_rem
+    expected_type: numeric
+    description: Índice de desaturaciones durante sueño REM.
+    rules:
+      - id: range
+        min: 0.0
+        max: 600.0
+
+  - name: indice_desat_nrem
+    expected_type: numeric
+    description: Índice de desaturaciones durante sueño NREM.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1000.0
+
+  - name: indice_desat_total
+    expected_type: numeric
+    description: Índice total de desaturaciones.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1200.0
+
+  - name: tiempo_desat_90_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 90% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_desat_90_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 90% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_desat_80_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 80% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_desat_80_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 80% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_desat_70_rem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 70% durante REM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: tiempo_desat_70_nrem
+    expected_type: numeric
+    description: Tiempo acumulado con saturación menor de 70% durante NREM, en minutos.
+    rules:
+      - id: range
+        min: 0.0
+        max: 1440.0
+
+  - name: marca_equipo
+    expected_type: text
+    description: Marca del equipo utilizado en la titulación.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+
+  - name: tipo_mascara
+    expected_type: categorical
+    description: Tipo de máscara utilizada durante la titulación.
+    normalization:
+      - trim
+      - uppercase
+    rules:
+      - id: required
+      - id: domain
+        values: ["NASAL", "ORONASAL", "FACIAL", "ALMOHADILLAS NASALES", "OTRA"]
+
+  - name: tamano_mascara
+    expected_type: text
+    description: Tamaño reportado de la máscara utilizada.
+    normalization:
+      - trim
+    rules: []
+
+  - name: presion_terapeutica
+    expected_type: numeric
+    description: Presión terapéutica indicada en la titulación, usualmente en cmH2O.
+    rules:
+      - id: required
+      - id: range
+        min: 2.0
+        max: 30.0
+
+  - name: numero_eventos_ah
+    expected_type: numeric
+    description: Número total de eventos de apnea e hipopnea registrados.
+    rules:
+      - id: range
+        min: 0
+        max: 5000
+
+  - name: fuente
+    expected_type: text
+    description: Ruta o identificador del archivo fuente del cual se extrajo el registro.
+    normalization:
+      - trim
+    rules:
+      - id: required
+
+  - name: uuid
+    expected_type: identifier
+    description: Identificador único del registro extraído.
+    normalization:
+      - trim
+      - lowercase
+    rules:
+      - id: required
+      - id: unique
+      - id: regex
+        pattern: "^[a-f0-9]{32}$"
+
+  - name: version_control
+    expected_type: text
+    description: Marca de trazabilidad del proceso de extracción.
+    normalization:
+      - trim
+    rules:
+      - id: required
+      - id: regex
+        pattern: "^Extraido:\\s\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}$"

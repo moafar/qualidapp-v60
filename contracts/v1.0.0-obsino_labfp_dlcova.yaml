@@ -1,0 +1,295 @@
+dataset:
+  name: dlco_estudios
+  domain: laboratorio_funcion_pulmonar
+  description: >
+    Dataset de estudios de difusión pulmonar (DLCO) con variables
+    demográficas, antecedentes clínicos, resultados pre, predichos,
+    límites normales e interpretación.
+
+schema_policy:
+  missing_columns: error
+  extra_columns: warning
+
+columns:
+
+  # -------------------------
+  # Identificación del examen
+  # -------------------------
+  - name: examen_fecha
+    expected_type: date
+    criticality: high
+    rules:
+      - id: required
+      - id: date-format
+        format: DD/MM/YYYY
+
+  - name: examen_comentarios
+    expected_type: text
+    criticality: low
+
+  - name: examen_interpretacion
+    expected_type: text
+    criticality: medium
+
+  # -------------------------
+  # Datos del paciente
+  # -------------------------
+  - name: pte_documento
+    expected_type: identifier
+    criticality: high
+    rules:
+      - id: required
+
+  - name: pte_apellido
+    expected_type: text
+    criticality: high
+    normalization: [trim, uppercase]
+    rules:
+      - id: required
+
+  - name: pte_nombre1
+    expected_type: text
+    criticality: high
+    normalization: [trim, uppercase]
+    rules:
+      - id: required
+
+  - name: pte_nombre2
+    expected_type: text
+    criticality: low
+    normalization: [trim, uppercase]
+
+  - name: pte_fecha_nacimiento
+    expected_type: date
+    criticality: high
+    rules:
+      - id: required
+      - id: date-format
+        format: DD/MM/YYYY
+
+  - name: pte_edad
+    expected_type: integer
+    criticality: high
+    rules:
+      - id: range
+        min: 0
+        max: 120
+
+  - name: pte_sexo
+    expected_type: categorical
+    criticality: high
+    rules:
+      - id: domain
+        values: [Male, Female]
+
+  - name: pte_peso
+    expected_type: number
+    unit: kg
+    criticality: medium
+
+  - name: pte_talla
+    expected_type: number
+    unit: cm
+    criticality: medium
+
+  - name: pte_etnia
+    expected_type: categorical
+    criticality: low
+
+  - name: pte_imc
+    expected_type: number
+    criticality: medium
+    rules:
+      - id: range
+        min: 10
+        max: 60
+
+  - name: pte_asc
+    expected_type: number
+    criticality: low
+
+  - name: pte_dx
+    expected_type: text
+    criticality: high
+
+  # -------------------------
+  # Antecedentes
+  # -------------------------
+  - name: antec_disnea
+    expected_type: categorical
+    criticality: medium
+
+  - name: antec_tos
+    expected_type: categorical
+    criticality: medium
+
+  - name: antec_sibilancias
+    expected_type: categorical
+    criticality: medium
+
+  # -------------------------
+  # Tabaquismo
+  # -------------------------
+  - name: tabaco_producto
+    expected_type: categorical
+    criticality: medium
+
+  - name: tabaco_anios_fumando
+    expected_type: number
+    criticality: low
+    rules:
+      - id: range
+        min: 0
+        max: 80
+
+  - name: tabaco_paquetes_dia
+    expected_type: number
+    criticality: low
+
+  - name: tabaco_anios_dejado
+    expected_type: number
+    criticality: low
+
+  - name: tabaco_anios_paquete
+    expected_type: number
+    criticality: low
+
+  # -------------------------
+  # Resultados DLCO / VA
+  # -------------------------
+  - name: dlcocor_pre
+    expected_type: number
+    criticality: high
+
+  - name: va_pre
+    expected_type: number
+    criticality: high
+
+  - name: dlcocor_predicted
+    expected_type: number
+    criticality: medium
+
+  - name: va_predicted
+    expected_type: number
+    criticality: medium
+
+  - name: dlcocor_lln
+    expected_type: number
+    criticality: medium
+
+  - name: va_lln
+    expected_type: number
+    criticality: medium
+
+  - name: dlcocor_uln
+    expected_type: number
+    criticality: medium
+
+  - name: va_uln
+    expected_type: number
+    criticality: medium
+
+  - name: dlcocor_porc_predicted
+    expected_type: number
+    criticality: high
+    rules:
+      - id: range
+        min: 0
+        max: 200
+
+  - name: va_porc_predicted
+    expected_type: number
+    criticality: high
+    rules:
+      - id: range
+        min: 0
+        max: 200
+
+  - name: dlcocor_sd
+    expected_type: number
+    criticality: low
+
+  - name: va_sd
+    expected_type: number
+    criticality: low
+
+  - name: dlco_ats_grades
+    expected_type: integer
+    criticality: medium
+    rules:
+      - id: range
+        min: 1
+        max: 5
+
+  # -------------------------
+  # Profesionales y firma
+  # -------------------------
+  - name: md_nombre_completo
+    expected_type: text
+    criticality: low
+
+  - name: md_apellidos
+    expected_type: text
+    criticality: low
+
+  - name: md_nombres
+    expected_type: text
+    criticality: low
+
+  - name: tec_nombre_completo
+    expected_type: text
+    criticality: low
+
+  - name: tec_apellidos
+    expected_type: text
+    criticality: low
+
+  - name: tec_nombres
+    expected_type: text
+    criticality: low
+
+  - name: firma_nombre_completo
+    expected_type: text
+    criticality: low
+
+  - name: firma_apellidos
+    expected_type: text
+    criticality: low
+
+  - name: firma_nombres
+    expected_type: text
+    criticality: low
+
+  - name: firma_boolean
+    expected_type: boolean
+    criticality: medium
+
+  - name: firma_fecha
+    expected_type: date
+    criticality: medium
+
+  # -------------------------
+  # Sala y equipo
+  # -------------------------
+  - name: sala_nombre
+    expected_type: text
+    criticality: low
+
+  - name: sala_humedad
+    expected_type: number
+    unit: percent
+    criticality: low
+
+  - name: sala_temperatura
+    expected_type: number
+    unit: celsius
+    criticality: low
+
+  - name: sala_presion
+    expected_type: number
+    unit: mmHg
+    criticality: low
+
+  - name: dlco_test
+    expected_type: categorical
+    criticality: medium
