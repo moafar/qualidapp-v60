@@ -1,0 +1,346 @@
+contract_version: 4.0.0
+
+history:
+  - version: "4.0.0"
+    date: 2026-03-26
+    author: Observatorio
+    description: >
+      Contrato con nomenclatura estandarizada v4.0.0 para estudios basales.
+      Se incorporan variables derivadas y categóricas.
+
+dataset:
+  id: stg_clisueno_basal_extract
+  title: Datos extraídos de estudio basal de polisomnografía
+  description: >
+    Conjunto de datos estructurado con variables demográficas, antropométricas,
+    métricas de sueño, índices respiratorios, desaturación y variables categorizadas derivadas.
+  owner: Clínica de Sueño
+  domain: Clínica de sueño
+  tags:
+    - polisomnografia
+    - basal
+    - extract
+  source_file: basal_extract.csv
+
+schema_policy:
+  mode: permissive
+  on_extra_columns: warn
+  on_missing_columns: fail
+
+rule_catalog:
+  - id: required
+  - id: unique
+  - id: range
+  - id: date-range
+  - id: domain
+  - id: regex
+
+columns:
+
+  # -------------------------
+  # PACIENTE
+  # -------------------------
+
+  - name: pte_nombre
+    expected_type: text
+    normalization: [trim, uppercase]
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: pte_id
+    expected_type: identifier
+    normalization: [trim]
+    rules:
+      - id: required
+    sensitivity: pii
+
+  - name: pte_imc
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 8
+        max: 80
+
+  - name: pte_anos_decimales
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 120
+
+  - name: pte_grupo_edad
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Menor de 12", "De 12 a 18", "Mayor de 18"]
+
+  - name: pte_peso_kg
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 2
+        max: 300
+
+  - name: pte_talla_cm
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 30
+        max: 250
+
+  - name: pte_cuello_cm
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 10
+        max: 80
+
+  - name: pte_perimetro_abdominal_cm
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 20
+        max: 250
+
+  # -------------------------
+  # CONTEXTO
+  # -------------------------
+
+  - name: basal_solicita
+    expected_type: text
+    normalization: [trim]
+
+  - name: basal_empresa
+    expected_type: categorical
+    normalization: [trim]
+    rules:
+      - id: required
+
+  - name: basal_fecha_estudio
+    expected_type: datetime
+    rules:
+      - id: required
+
+  - name: basal_epworth
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 24
+
+  - name: cat_epworth
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Normal","Leve","Moderada","Grave","Sin dato"]
+
+  # -------------------------
+  # SUEÑO
+  # -------------------------
+
+  - name: basal_tiempo_en_cama
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 720
+
+  - name: basal_tiempo_sueno
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 720
+
+  - name: basal_eficiencia_sueno
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  - name: cat_efic_sueno
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Muy baja","Baja","Normal","Sin dato"]
+
+  - name: basal_latencia_sueno_total
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 360
+
+  - name: basal_latencia_sueno_rem
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 360
+
+  # -------------------------
+  # MICRODESPERTARES
+  # -------------------------
+
+  - name: basal_indice_microalertamientos
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1000
+
+  - name: cat_indice_microalertamientos
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Normal","Anormal","Sin dato"]
+
+  # -------------------------
+  # ARQUITECTURA
+  # -------------------------
+
+  - name: basal_porcentaje_sueno_rem
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  - name: cat_porc_sueno_rem
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Bajo","Normal","Aumentado","Sin dato"]
+
+  - name: basal_porcentaje_sueno_profundo
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  - name: cat_porc_sueno_profundo
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Bajo","Normal","Aumentado","Sin dato"]
+
+  # -------------------------
+  # EVENTOS RESPIRATORIOS
+  # -------------------------
+
+  - name: basal_iac
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 150
+
+  - name: basal_iao
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 150
+
+  - name: basal_iam
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 150
+
+  - name: basal_ih
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 200
+
+  - name: basal_iah
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 200
+
+  - name: cat_iah
+    expected_type: categorical
+    rules:
+      - id: domain
+        values: ["Leve","Moderado","Grave","Normal","Inconsistente"]
+
+  # -------------------------
+  # DESATURACIÓN
+  # -------------------------
+
+  - name: basal_indice_desat_rem
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 600
+
+  - name: basal_indice_desat_nrem
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1000
+
+  - name: basal_indice_desat_total
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1200
+
+  - name: basal_numero_eventos_ah
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 5000
+
+  - name: basal_t90
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  - name: basal_t80
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  - name: basal_t70
+    expected_type: numeric
+    rules:
+      - id: range
+        min: 0
+        max: 1
+
+  # -------------------------
+  # METADATOS
+  # -------------------------
+
+  - name: basal_fuente
+    expected_type: text
+    rules:
+      - id: required
+
+  - name: basal_uuid
+    expected_type: identifier
+    rules:
+      - id: required
+      - id: unique
+
+  - name: basal_version_control
+    expected_type: text
+    rules:
+      - id: required
